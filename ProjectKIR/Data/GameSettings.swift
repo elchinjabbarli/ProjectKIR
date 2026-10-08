@@ -29,12 +29,13 @@ struct GameSettings {
 
     func save() {
         let d = UserDefaults.standard
-        d.set(masterVolume, forKey: key + ".master")
-        d.set(musicVolume, forKey: key + ".music")
-        d.set(sfxVolume, forKey: key + ".sfx")
-        d.set(hapticsEnabled, forKey: key + ".haptics")
-        d.set(subtitlesEnabled, forKey: key + ".subs")
-        d.set(reduceMotion, forKey: key + ".motion")
-        d.set(highContrast, forKey: key + ".contrast")
+        // Static 'key' — instance üzerinden değil, tip adı üzerinden çağrılmalı
+        d.set(masterVolume, forKey: GameSettings.key + ".master")
+        d.set(musicVolume, forKey: GameSettings.key + ".music")
+        d.set(sfxVolume, forKey: GameSettings.key + ".sfx")
+        d.set(hapticsEnabled, forKey: GameSettings.key + ".haptics")
+        d.set(subtitlesEnabled, forKey: GameSettings.key + ".subs")
+        d.set(reduceMotion, forKey: GameSettings.key + ".motion")
+        d.set(highContrast, forKey: GameSettings.key + ".contrast")
     }
 }
