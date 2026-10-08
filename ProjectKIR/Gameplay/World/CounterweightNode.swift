@@ -29,7 +29,9 @@ final class CounterweightNode: InteractiveObject {
 
     required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) kullanılmıyor") }
 
-    override func didMoveToParent() { homePosition = position }
+    /// SKNode didMoveToParent()'i Xcode 15.4'te desteklemiyor — override kaldırıldı.
+    /// Parent'a eklendiğinde manuel olarak çağrılır (GameScene init).
+    func didMoveToParent() { homePosition = position }
 
     func attachScene(_ scene: GameScene) { sceneRef = scene }
 
