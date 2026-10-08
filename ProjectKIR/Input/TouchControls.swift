@@ -73,6 +73,9 @@ final class TouchControls: SKNode {
         crouchButton.lineWidth = 2
         let crl = SKLabelNode.caption("▼", size: 18, color: KIRPalette.dirtyWhite)
 
+        // pauseButton let stored property — super.init()'den ÖNCE initialize edilmeli.
+        pauseButton = SKShapeNode(rectOf: CGSize(width: 44, height: 44), cornerRadius: 10)
+
         super.init()
         addChild(stickBase)
         stickBase.addChild(stickKnob)
@@ -84,7 +87,7 @@ final class TouchControls: SKNode {
         crouchButton.addChild(crl)
 
         // Duraklat — sol üst, güvenli alan içinde.
-        pauseButton = SKShapeNode(rectOf: CGSize(width: 44, height: 44), cornerRadius: 10)
+        // pauseButton super.init()'den sonra konfigüre edilir (SKShapeNode property'leri).
         pauseButton.fillColor = SKColor(white: 1, alpha: 0.05)
         pauseButton.strokeColor = KIRPalette.dirtyWhite.withAlphaComponent(0.5)
         pauseButton.lineWidth = 1.5
