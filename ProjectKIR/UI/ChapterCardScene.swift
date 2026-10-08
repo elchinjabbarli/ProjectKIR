@@ -28,7 +28,7 @@ final class ChapterCardScene: SKScene {
         chapterLabel.position = CGPoint(x: cx, y: cy + 60)
         addChild(chapterLabel)
 
-        let nameLabel = SKLabelNode(info.title)
+        let nameLabel = SKLabelNode(text: info.title)
         nameLabel.fontName = "AvenirNext-Medium"
         nameLabel.fontSize = 42
         nameLabel.fontColor = KIRPalette.dirtyWhite
