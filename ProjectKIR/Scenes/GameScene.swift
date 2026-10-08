@@ -456,16 +456,16 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
     // MARK: - Donanım klavyesi (simülatör / iPad) — UIResponder presses API.
     override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         for press in presses {
-            if let key = press.key, let chars = key.charactersIgnoringModifiers, !chars.isEmpty {
-                keyboard.keyDown(String(chars.prefix(1)))
+            if let key = press.key, !key.charactersIgnoringModifiers.isEmpty {
+                keyboard.keyDown(String(key.charactersIgnoringModifiers.prefix(1)))
             }
         }
     }
 
     override func pressesEnded(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         for press in presses {
-            if let key = press.key, let chars = key.charactersIgnoringModifiers, !chars.isEmpty {
-                keyboard.keyUp(String(chars.prefix(1)))
+            if let key = press.key, !key.charactersIgnoringModifiers.isEmpty {
+                keyboard.keyUp(String(key.charactersIgnoringModifiers.prefix(1)))
             }
         }
     }
