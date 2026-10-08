@@ -153,11 +153,12 @@ final class AudioDirector {
     func duckMusic(_ amount: Float, for seconds: Double) {
         guard let m = mixers[.music] else { return }
         let target = currentSettings.musicVolume * currentSettings.masterVolume * (1 - amount)
-        m.setOutputVolume(target, rampTime: 0.3)
+        // AVAudioMixerNode.outputVolume (Xcode 15.4'te setOutputVolume:rampTime: kaldırıldı)
+        m.outputVolume = target
         DispatchQueue.main.asyncAfter(deadline: .now() + seconds) { [weak self] in
             guard let self = self, let mm = self.mixers[.music] else { return }
             let v = self.currentSettings.musicVolume * self.currentSettings.masterVolume
-            mm.setOutputVolume(v, rampTime: 0.8)
+            mm.outputVolume = v
         }
     }
 
@@ -208,7 +209,7 @@ final class AudioDirector {
         put("dronecalm", ProceduralSFX.sine(440, duration: 0.5, gain: 0.12, release: 0.7))
         put("debris", ProceduralSFX.metalImpact(baseFreq: 210, duration: 0.4, gain: 0.3))
         put("silt", ProceduralSFX.noiseBurst(duration: 1.6, gain: 0.3, lowpass: 500, attack: 0.15, release: 0.5))
-        put("electric", ProceduralSFX.noiseBurst(duration: 0.5, gain: 0.28, lowpass: 6000, hp: 1800, attack: 0.02, release: 0.7))
+        put("electric", ProceduralSFX.noiseBurst(duration: 0.5, gain: 0.28, lowpass: 6000, attack: 0.02, release: 0.7, hp: 1800))
 
         // UI.
         put("uiclick", ProceduralSFX.sine(990, duration: 0.05, gain: 0.14, release: 0.4))
