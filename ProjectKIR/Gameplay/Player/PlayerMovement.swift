@@ -15,7 +15,8 @@ struct PlayerMovement {
 
     /// Ray ile zemin yoklaması — spec 228: sol/orta/sağ ayak probları.
     /// Hızla yükselirken (zıplama) zemin aramayı bırak; yavaş itki (su kaldırma) sırasında aramaya devam et.
-    func probeGround(player: PlayerNode, in scene: SKScene) -> Bool {
+    /// `mutating` — groundY private(set) property'sini set eder.
+    mutating func probeGround(player: PlayerNode, in scene: SKScene) -> Bool {
         guard let body = player.physicsBody else { return false }
         if body.velocity.dy > 400 { return false }
         let halfW = Tuning.playerSize.width * 0.35
