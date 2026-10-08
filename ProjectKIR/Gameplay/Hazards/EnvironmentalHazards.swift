@@ -44,7 +44,7 @@ final class EnvironmentalHazards {
             chunk.position = CGPoint(x: x, y: fallZone.maxY)
             chunk.zPosition = 22
             chunk.name = NodeNames.debris
-            sceneRef?.worldNode?.addChild(chunk)
+            sceneRef?.worldNode.addChild(chunk)
 
             let body = SKPhysicsBody(rectangleOf: size)
             body.categoryBitMask = PhysicsCategory.debris
