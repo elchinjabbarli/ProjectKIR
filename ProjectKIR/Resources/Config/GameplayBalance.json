@@ -1,0 +1,27 @@
+{
+  "_comment": "PROJECT KIR — oynanış denge dosyası (spec 330/331). Kod yeniden derlenmeden ayar yapmayı sağlar. Eksik/bozuk alanlar kod içindeki varsayılanlara döner.",
+  "player": {
+    "moveSpeed": 260,
+    "crouchSpeed": 120,
+    "jumpVelocity": 760,
+    "gravity": -2100,
+    "maxFallSpeed": -1200,
+    "coyoteTime": 0.12,
+    "jumpBuffer": 0.14,
+    "airControl": 0.75
+  },
+  "resonance": {
+    "chargeDuration": 0.65,
+    "pulseRange": 520,
+    "pulseTravelSpeed": 700
+  },
+  "drone": {
+    "sightRange": 560,
+    "sightHalfAngle": 0.55,
+    "crouchSightFactor": 0.6
+  },
+  "world": {
+    "interactRange": 110,
+    "fallDeathDistanceBeyondBounds": 140
+  }
+}
