@@ -109,7 +109,7 @@ enum ProceduralSFX {
         for i in 0..<n {
             let t = Double(i) / Double(n)
             // Yükseliş (0–0.2) sonra sönüm.
-            let f: Double
+            var f: Double
             if t < 0.18 {
                 f = start + (peak - start) * (t / 0.18)
             } else {
