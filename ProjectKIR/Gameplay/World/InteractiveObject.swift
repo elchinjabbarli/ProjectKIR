@@ -7,13 +7,14 @@ class InteractiveObject: SKNode, ResonanceReactive {
     let entityID: String
     var acceptedFrequency: ResonanceFrequency { .deep }
     var resonanceSensitivity: Float { 0.8 }
-    var resonatesWithAnyFrequency = true
+    var resonatesWithAnyFrequency: Bool { false }
 
     /// Bağlı olduğu nesneler (zincir — spec 20/258).
     var linkedIDs: [String] = []
 
     /// Nesne şu an tepki verebilir mi (kapı açıksa vb.).
-    var isInteractiveActive = true
+    /// Computed — subclass'lar override edebilir (spec 251).
+    var isInteractiveActive: Bool { true }
 
     /// Görsel durum etiketi (debug).
     var stateLabel: String { "" }
@@ -29,6 +30,11 @@ class InteractiveObject: SKNode, ResonanceReactive {
     required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) kullanılmıyor") }
 
     func receiveResonance(_ pulse: ResonancePulse) {
+        // Alt sınıf doldurur.
+    }
+
+    /// Yanlış frekansta hafif tepki — alt sınıflar override eder (spec 385).
+    func receiveWrongFrequency(_ pulse: ResonancePulse) {
         // Alt sınıf doldurur.
     }
 
