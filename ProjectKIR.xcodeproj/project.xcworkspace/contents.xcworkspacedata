@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Workspace
-   version = "1.0">
-   <FileRef
-      location = "self:ProjectKIR.xcodeproj">
-   </FileRef>
-</Workspace>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>_CPWorkspaceMainFileReferenceID</key>
+    <string>mainGroup</string>
+    <key>fileRef</key>
+    <dict>
+        <key>location</key>
+        <string>self:ProjectKIR.xcodeproj</string>
+    </dict>
+</dict>
+</plist>
