@@ -1,0 +1,171 @@
+name: Build & Run iOS Simulator
+
+on:
+  workflow_dispatch:
+    inputs:
+      device:
+        description: 'Simulator cihazı'
+        type: choice
+        options:
+          - iPhone 15 Pro
+          - iPhone 15
+          - iPhone 14 Pro
+        default: iPhone 15 Pro
+      delay:
+        description: 'Render bekleme (sn)'
+        default: '8'
+  push:
+    branches: [main]
+
+jobs:
+  build-and-screenshot:
+    runs-on: macos-14
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: DIAGNOSTIC - Inspect project files
+        run: |
+          echo "=== Xcode Version ==="
+          xcodebuild -version
+          echo ""
+          echo "=== .xcodeproj klasör yapısı ==="
+          ls -laR ProjectKIR.xcodeproj/
+          echo ""
+          echo "=== pbxproj dosya tipi ==="
+          file ProjectKIR.xcodeproj/project.pbxproj
+          echo ""
+          echo "=== pbxproj boyut ==="
+          wc -c ProjectKIR.xcodeproj/project.pbxproj
+          echo ""
+          echo "=== pbxproj ilk 20 satır (cat -A ile görünmez karakterler) ==="
+          cat -A ProjectKIR.xcodeproj/project.pbxproj | head -20
+          echo ""
+          echo "=== pbxproj ilk 64 byte (hexdump) ==="
+          hexdump -C ProjectKIR.xcodeproj/project.pbxproj | head -8
+          echo ""
+          echo "=== contents.xcworkspacedata içeriği ==="
+          cat ProjectKIR.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+          echo ""
+          echo "=== contents.xcworkspacedata hexdump ==="
+          hexdump -C ProjectKIR.xcodeproj/project.xcworkspace/contents.xcworkspacedata | head -10
+          echo ""
+          echo "=== Python OpenStep plist parse denemesi ==="
+          python3 -c "
+          import subprocess, sys
+          try:
+              result = subprocess.run(['plutil', '-lint', '-s', 'ProjectKIR.xcodeproj/project.pbxproj'], capture_output=True, text=True)
+              print('plutil stdout:', result.stdout)
+              print('plutil stderr:', result.stderr)
+              print('plutil exit:', result.returncode)
+          except Exception as e:
+              print('Error:', e)
+          "
+          echo ""
+          echo "=== Swift dosya sayısı ==="
+          find ProjectKIR -name '*.swift' | wc -l
+          echo ""
+          echo "=== JSON level dosyaları ==="
+          ls -la ProjectKIR/Resources/Levels/
+          echo ""
+          echo "=== Info.plist kontrolü ==="
+          plutil -lint ProjectKIR/Resources/Info.plist
+
+      - name: DIAGNOSTIC - xcodebuild -list
+        run: |
+          echo "=== xcodebuild -project -list ==="
+          xcodebuild -project ProjectKIR.xcodeproj -list 2>&1 || true
+          echo ""
+          echo "=== xcodebuild -workspace -list ==="
+          xcodebuild -workspace ProjectKIR.xcodeproj/project.xcworkspace -list 2>&1 || true
+
+      - name: Build for iOS Simulator
+        run: |
+          DEVICE="${{ github.event.inputs.device || 'iPhone 15 Pro' }}"
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          for runtime, devices in data['devices'].items():
+            for d in devices:
+              if d['name'] == '$DEVICE' and d.get('isAvailable', False):
+                print(d['udid']); sys.exit(0)
+          for runtime, devices in data['devices'].items():
+            for d in devices:
+              if 'iPhone' in d['name'] and d.get('isAvailable', False):
+                print(d['udid']); sys.exit(0)
+          ")
+          echo "UDID=$UDID"
+          echo "=== BUILD START ==="
+          xcodebuild \
+            -project ProjectKIR.xcodeproj \
+            -scheme ProjectKIR \
+            -configuration Debug \
+            -destination "id=$UDID" \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build 2>&1 | tee build.log
+          BUILD_EXIT=${PIPESTATUS[0]}
+          echo "=== BUILD EXIT: $BUILD_EXIT ==="
+          exit $BUILD_EXIT
+
+      - name: Locate .app bundle
+        id: find_app
+        run: |
+          APP=$(find build/DerivedData -name "*.app" -path "*Debug*" -type d | head -1)
+          [ -z "$APP" ] && { echo "ERROR: .app bulunamadı"; tail -80 build.log; exit 1; }
+          echo "app_path=$APP" >> $GITHUB_OUTPUT
+          echo "app_name=$(basename $APP)" >> $GITHUB_OUTPUT
+
+      - name: Get bundle ID
+        id: app_info
+        run: |
+          APP="${{ steps.find_app.outputs.app_path }}"
+          BUNDLE_ID=$(plutil -extract CFBundleIdentifier raw "$APP/Info.plist")
+          echo "bundle_id=$BUNDLE_ID" >> $GITHUB_OUTPUT
+          echo "Bundle ID: $BUNDLE_ID"
+
+      - name: Boot + Install + Launch
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          for runtime, devices in data['devices'].items():
+            for d in devices:
+              if 'iPhone' in d['name'] and d.get('isAvailable', False):
+                print(d['udid']); sys.exit(0)
+          ")
+          xcrun simctl boot "$UDID" 2>/dev/null || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl install "$UDID" "${{ steps.find_app.outputs.app_path }}"
+          xcrun simctl launch "$UDID" "${{ steps.app_info.outputs.bundle_id }}"
+          echo "UDID=$UDID" >> $GITHUB_ENV
+
+      - name: Wait + Screenshot + Video
+        run: |
+          DELAY="${{ github.event.inputs.delay || '8' }}"
+          sleep "$DELAY"
+          mkdir -p artifacts
+          xcrun simctl io "$UDID" screenshot artifacts/01-initial.png
+          xcrun simctl io "$UDID" recordVideo --codec=h264 artifacts/recording.mp4 &
+          REC_PID=$!
+          sleep 10
+          kill -INT $REC_PID 2>/dev/null || true
+          wait $REC_PID 2>/dev/null || true
+          xcrun simctl io "$UDID" screenshot artifacts/02-after-10s.png
+
+      - name: Collect logs
+        if: always()
+        run: |
+          mkdir -p artifacts
+          cp build.log artifacts/ 2>/dev/null || true
+          xcrun simctl list devices | grep -E "Booted" > artifacts/sim-status.log 2>&1 || true
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-capture
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 30
