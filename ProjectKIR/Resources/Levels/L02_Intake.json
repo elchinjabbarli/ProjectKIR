@@ -1,0 +1,194 @@
+{
+  "id": "L02_Intake",
+  "name": "Alım Odası",
+  "chapter": 2,
+  "frequencies": [
+    "deep"
+  ],
+  "spawn": {
+    "x": 140,
+    "y": 260
+  },
+  "camera": {
+    "left": 0,
+    "right": 5600,
+    "top": 1100,
+    "bottom": 0
+  },
+  "ambient": {
+    "palette": "flood",
+    "musicState": "calm"
+  },
+  "solids": [
+    {
+      "id": "g01",
+      "type": "ground",
+      "x": 400,
+      "y": 75.0,
+      "w": 900,
+      "h": 150
+    },
+    {
+      "id": "g02",
+      "type": "ground",
+      "x": 1500,
+      "y": 75.0,
+      "w": 700,
+      "h": 150
+    },
+    {
+      "id": "g03_pool",
+      "type": "ground",
+      "x": 2700,
+      "y": 30,
+      "w": 900,
+      "h": 300
+    },
+    {
+      "id": "g04",
+      "type": "ground",
+      "x": 3750,
+      "y": 75.0,
+      "w": 600,
+      "h": 150
+    },
+    {
+      "id": "g05",
+      "type": "ground",
+      "x": 4650,
+      "y": 75.0,
+      "w": 500,
+      "h": 150
+    },
+    {
+      "id": "g06",
+      "type": "ground",
+      "x": 5300,
+      "y": 75.0,
+      "w": 500,
+      "h": 150
+    },
+    {
+      "id": "w02",
+      "type": "wall",
+      "x": 2950,
+      "y": 155,
+      "w": 40,
+      "h": 250
+    },
+    {
+      "id": "p02",
+      "type": "platform",
+      "x": 1000,
+      "y": 250,
+      "w": 140,
+      "h": 22
+    }
+  ],
+  "entities": [
+    {
+      "id": "door_l02_a",
+      "type": "door",
+      "x": 3500,
+      "y": 235,
+      "frequency": "deep",
+      "height": 150
+    },
+    {
+      "id": "valve_l02_a",
+      "type": "valve",
+      "x": 2450,
+      "y": 200,
+      "waterID": "w2",
+      "level": "mid"
+    },
+    {
+      "id": "float_l02",
+      "type": "platform",
+      "x": 2700,
+      "y": 120,
+      "mode": "floating",
+      "w": 150,
+      "h": 20
+    },
+    {
+      "id": "cw_l02_a",
+      "type": "counterweight",
+      "x": 4300,
+      "y": 300,
+      "linkedID": "cw_l02_b",
+      "travelX": 0,
+      "travelY": -170
+    },
+    {
+      "id": "cw_l02_b",
+      "type": "counterweight",
+      "x": 4750,
+      "y": 130,
+      "linkedID": "cw_l02_a",
+      "travelX": 0,
+      "travelY": 170
+    },
+    {
+      "id": "plat_l02_b",
+      "type": "platform",
+      "x": 4500,
+      "y": 180,
+      "mode": "triggered",
+      "pathX": [
+        0
+      ],
+      "pathY": [
+        200
+      ],
+      "w": 160,
+      "h": 22
+    },
+    {
+      "id": "door_l02_b",
+      "type": "door",
+      "x": 5100,
+      "y": 235,
+      "frequency": "deep"
+    },
+    {
+      "id": "exit_l02",
+      "type": "exit",
+      "x": 5440,
+      "y": 225
+    }
+  ],
+  "water": [
+    {
+      "id": "w2",
+      "x": 2700,
+      "baseY": 30,
+      "width": 880,
+      "start": "low",
+      "low": 60,
+      "mid": 170,
+      "high": 280
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "cp_l02_a",
+      "x": 1550,
+      "y": 110
+    },
+    {
+      "id": "cp_l02_b",
+      "x": 3900,
+      "y": 110
+    }
+  ],
+  "storyBeats": [
+    {
+      "id": "b_l02_water",
+      "triggerType": "enter",
+      "duration": 2.0,
+      "playerLocked": false,
+      "x": 2200
+    }
+  ]
+}

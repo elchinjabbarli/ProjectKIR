@@ -1,0 +1,158 @@
+{
+  "id": "L04_OrchardEdge",
+  "name": "Bahçe Kenarı",
+  "chapter": 3,
+  "frequencies": [
+    "deep",
+    "body"
+  ],
+  "spawn": {
+    "x": 140,
+    "y": 260
+  },
+  "camera": {
+    "left": 0,
+    "right": 5800,
+    "top": 1100,
+    "bottom": 0
+  },
+  "ambient": {
+    "palette": "orchard",
+    "musicState": "calm"
+  },
+  "solids": [
+    {
+      "id": "g01",
+      "type": "ground",
+      "x": 400,
+      "y": 75.0,
+      "w": 900,
+      "h": 150
+    },
+    {
+      "id": "g02",
+      "type": "ground",
+      "x": 1500,
+      "y": 75.0,
+      "w": 700,
+      "h": 150
+    },
+    {
+      "id": "g03",
+      "type": "ground",
+      "x": 2450,
+      "y": 75.0,
+      "w": 800,
+      "h": 150
+    },
+    {
+      "id": "g04",
+      "type": "ground",
+      "x": 3500,
+      "y": 75.0,
+      "w": 900,
+      "h": 150
+    },
+    {
+      "id": "p01",
+      "type": "platform",
+      "x": 1200,
+      "y": 320,
+      "w": 140,
+      "h": 22
+    },
+    {
+      "id": "p02",
+      "type": "platform",
+      "x": 3050,
+      "y": 300,
+      "w": 150,
+      "h": 22
+    },
+    {
+      "id": "g05",
+      "type": "ground",
+      "x": 4700,
+      "y": 75.0,
+      "w": 800,
+      "h": 150
+    },
+    {
+      "id": "w04",
+      "type": "wall",
+      "x": 5550,
+      "y": 400,
+      "w": 40,
+      "h": 700
+    }
+  ],
+  "entities": [
+    {
+      "id": "seq_door_l04",
+      "type": "door",
+      "x": 4150,
+      "y": 235,
+      "sequence": [
+        "deep",
+        "body",
+        "deep"
+      ],
+      "height": 180
+    },
+    {
+      "id": "recv_l04_a",
+      "type": "receiver",
+      "x": 2600,
+      "y": 210,
+      "frequency": "body",
+      "linked": [
+        "door_l04_side"
+      ]
+    },
+    {
+      "id": "door_l04_side",
+      "type": "door",
+      "x": 2820,
+      "y": 235,
+      "frequency": "body"
+    },
+    {
+      "id": "bridge_l04",
+      "type": "bridge",
+      "x": 3850,
+      "y": 260,
+      "length": 200,
+      "duration": 4.0
+    },
+    {
+      "id": "exit_l04",
+      "type": "exit",
+      "x": 5400,
+      "y": 225
+    }
+  ],
+  "water": [],
+  "checkpoints": [
+    {
+      "id": "cp_l04_a",
+      "x": 1550,
+      "y": 110
+    },
+    {
+      "id": "cp_l04_b",
+      "x": 3600,
+      "y": 110
+    }
+  ],
+  "storyBeats": [
+    {
+      "id": "b_l04_body",
+      "triggerType": "distance",
+      "duration": 1.5,
+      "playerLocked": false,
+      "x": 2600,
+      "y": 260,
+      "cameraMode": "focus"
+    }
+  ]
+}

@@ -1,0 +1,246 @@
+{
+  "id": "L10_QuietEngine",
+  "name": "Sessiz Motor",
+  "chapter": 6,
+  "frequencies": [
+    "deep",
+    "body",
+    "edge"
+  ],
+  "spawn": {
+    "x": 140,
+    "y": 260
+  },
+  "camera": {
+    "left": 0,
+    "right": 7000,
+    "top": 1500,
+    "bottom": 0
+  },
+  "ambient": {
+    "palette": "engine",
+    "musicState": "silence"
+  },
+  "solids": [
+    {
+      "id": "g01",
+      "type": "ground",
+      "x": 400,
+      "y": 75.0,
+      "w": 700,
+      "h": 150
+    },
+    {
+      "id": "g02",
+      "type": "ground",
+      "x": 1300,
+      "y": 75.0,
+      "w": 500,
+      "h": 150
+    },
+    {
+      "id": "g03",
+      "type": "ground",
+      "x": 2200,
+      "y": 75.0,
+      "w": 700,
+      "h": 150
+    },
+    {
+      "id": "g04_hall",
+      "type": "ground",
+      "x": 4100,
+      "y": 30,
+      "w": 2800,
+      "h": 300
+    },
+    {
+      "id": "p01",
+      "type": "platform",
+      "x": 1000,
+      "y": 300,
+      "w": 140,
+      "h": 22
+    },
+    {
+      "id": "p02",
+      "type": "platform",
+      "x": 2650,
+      "y": 350,
+      "w": 160,
+      "h": 22
+    },
+    {
+      "id": "p03",
+      "type": "platform",
+      "x": 3050,
+      "y": 450,
+      "w": 160,
+      "h": 22
+    },
+    {
+      "id": "p04",
+      "type": "platform",
+      "x": 4400,
+      "y": 380,
+      "w": 150,
+      "h": 22
+    },
+    {
+      "id": "p05",
+      "type": "platform",
+      "x": 4700,
+      "y": 480,
+      "w": 150,
+      "h": 22
+    },
+    {
+      "id": "g05",
+      "type": "ground",
+      "x": 5900,
+      "y": 75.0,
+      "w": 800,
+      "h": 150
+    },
+    {
+      "id": "g06",
+      "type": "ground",
+      "x": 6700,
+      "y": 75.0,
+      "w": 600,
+      "h": 150
+    },
+    {
+      "id": "w10",
+      "type": "wall",
+      "x": 6950,
+      "y": 500,
+      "w": 40,
+      "h": 900
+    }
+  ],
+  "entities": [
+    {
+      "id": "recv_l10_phase1",
+      "type": "receiver",
+      "x": 3600,
+      "y": 230,
+      "frequency": "deep",
+      "linked": [
+        "recv_l10_phase2"
+      ]
+    },
+    {
+      "id": "recv_l10_phase2",
+      "type": "receiver",
+      "x": 3950,
+      "y": 230,
+      "frequency": "body",
+      "linked": [
+        "recv_l10_phase3"
+      ]
+    },
+    {
+      "id": "recv_l10_phase3",
+      "type": "receiver",
+      "x": 4300,
+      "y": 230,
+      "frequency": "edge",
+      "linked": [
+        "mirror_l10"
+      ]
+    },
+    {
+      "id": "mirror_l10",
+      "type": "mirror",
+      "x": 4550,
+      "y": 260,
+      "orientation": "up"
+    },
+    {
+      "id": "valve_l10",
+      "type": "valve",
+      "x": 4100,
+      "y": 520,
+      "waterID": "w10",
+      "level": "mid"
+    },
+    {
+      "id": "recv_l10_final",
+      "type": "receiver",
+      "x": 4750,
+      "y": 560,
+      "frequency": "deep",
+      "linked": [
+        "door_l10"
+      ]
+    },
+    {
+      "id": "door_l10",
+      "type": "door",
+      "x": 6100,
+      "y": 235,
+      "frequency": "deep",
+      "height": 200
+    },
+    {
+      "id": "exit_l10",
+      "type": "exit",
+      "x": 6850,
+      "y": 225
+    }
+  ],
+  "water": [
+    {
+      "id": "w10",
+      "x": 4100,
+      "baseY": 30,
+      "width": 2600,
+      "start": "low",
+      "low": 80,
+      "mid": 210,
+      "high": 330
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "cp_l10_a",
+      "x": 1400,
+      "y": 110
+    },
+    {
+      "id": "cp_l10_b",
+      "x": 5950,
+      "y": 110
+    }
+  ],
+  "storyBeats": [
+    {
+      "id": "b_l10_enter",
+      "triggerType": "enter",
+      "duration": 2.0,
+      "playerLocked": false,
+      "x": 2000,
+      "audioCue": "silence"
+    },
+    {
+      "id": "b_l10_core",
+      "triggerType": "distance",
+      "duration": 3.5,
+      "playerLocked": true,
+      "x": 4100,
+      "y": 500,
+      "cameraMode": "wide",
+      "audioCue": "tone"
+    },
+    {
+      "id": "b_l10_final",
+      "triggerType": "receiver",
+      "duration": 3.0,
+      "playerLocked": true,
+      "triggerID": "recv_l10_final",
+      "cameraMode": "wide",
+      "audioCue": "tone"
+    }
+  ]
+}

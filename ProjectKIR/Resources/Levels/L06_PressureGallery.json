@@ -1,0 +1,200 @@
+{
+  "id": "L06_PressureGallery",
+  "name": "Basınç Galerisi",
+  "chapter": 4,
+  "frequencies": [
+    "deep",
+    "body"
+  ],
+  "spawn": {
+    "x": 140,
+    "y": 260
+  },
+  "camera": {
+    "left": 0,
+    "right": 6800,
+    "top": 1200,
+    "bottom": 0
+  },
+  "ambient": {
+    "palette": "gallery",
+    "musicState": "tense"
+  },
+  "solids": [
+    {
+      "id": "g01",
+      "type": "ground",
+      "x": 400,
+      "y": 75.0,
+      "w": 800,
+      "h": 150
+    },
+    {
+      "id": "g02",
+      "type": "ground",
+      "x": 1300,
+      "y": 75.0,
+      "w": 400,
+      "h": 150
+    },
+    {
+      "id": "cov1",
+      "type": "cover",
+      "x": 2200,
+      "y": 195.0,
+      "w": 70,
+      "h": 90
+    },
+    {
+      "id": "cov2",
+      "type": "cover",
+      "x": 2700,
+      "y": 195.0,
+      "w": 70,
+      "h": 90
+    },
+    {
+      "id": "cov3",
+      "type": "cover",
+      "x": 3200,
+      "y": 195.0,
+      "w": 70,
+      "h": 90
+    },
+    {
+      "id": "g03",
+      "type": "ground",
+      "x": 2900,
+      "y": 75.0,
+      "w": 2600,
+      "h": 150
+    },
+    {
+      "id": "g04",
+      "type": "ground",
+      "x": 4400,
+      "y": 75.0,
+      "w": 700,
+      "h": 150
+    },
+    {
+      "id": "p01",
+      "type": "platform",
+      "x": 4950,
+      "y": 300,
+      "w": 140,
+      "h": 22
+    },
+    {
+      "id": "g05",
+      "type": "ground",
+      "x": 5700,
+      "y": 75.0,
+      "w": 600,
+      "h": 150
+    },
+    {
+      "id": "g06",
+      "type": "ground",
+      "x": 6500,
+      "y": 75.0,
+      "w": 500,
+      "h": 150
+    },
+    {
+      "id": "w06",
+      "type": "wall",
+      "x": 6550,
+      "y": 400,
+      "w": 40,
+      "h": 700
+    }
+  ],
+  "entities": [
+    {
+      "id": "wave_l06_a",
+      "type": "pressurewave",
+      "x": 2700,
+      "y": 320,
+      "w": 1600,
+      "h": 500,
+      "interval": 5.5,
+      "warning": 1.3
+    },
+    {
+      "id": "debris_l06",
+      "type": "debris",
+      "x": 2700,
+      "y": 700,
+      "w": 1200,
+      "h": 300,
+      "interval": 2.8
+    },
+    {
+      "id": "recv_l06",
+      "type": "receiver",
+      "x": 4450,
+      "y": 220,
+      "frequency": "deep",
+      "linked": [
+        "door_l06"
+      ]
+    },
+    {
+      "id": "door_l06",
+      "type": "door",
+      "x": 5050,
+      "y": 235,
+      "frequency": "deep"
+    },
+    {
+      "id": "bridge_l06",
+      "type": "bridge",
+      "x": 5350,
+      "y": 220,
+      "length": 360,
+      "duration": 4.5
+    },
+    {
+      "id": "exit_l06",
+      "type": "exit",
+      "x": 6620,
+      "y": 225
+    }
+  ],
+  "water": [],
+  "checkpoints": [
+    {
+      "id": "cp_l06_a",
+      "x": 1400,
+      "y": 110
+    },
+    {
+      "id": "cp_l06_b",
+      "x": 3450,
+      "y": 110
+    },
+    {
+      "id": "cp_l06_c",
+      "x": 5800,
+      "y": 110
+    }
+  ],
+  "storyBeats": [
+    {
+      "id": "b_l06_walk",
+      "triggerType": "enter",
+      "duration": 2.0,
+      "playerLocked": false,
+      "x": 1700
+    },
+    {
+      "id": "b_l06_rhythm",
+      "triggerType": "enter",
+      "duration": 2.0,
+      "playerLocked": false,
+      "x": 2000,
+      "audioCue": "silence"
+    }
+  ]
+}

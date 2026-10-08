@@ -1,0 +1,185 @@
+{
+  "id": "L07_FloodChamber",
+  "name": "Sel Odası",
+  "chapter": 4,
+  "frequencies": [
+    "deep",
+    "body",
+    "edge"
+  ],
+  "spawn": {
+    "x": 140,
+    "y": 260
+  },
+  "camera": {
+    "left": 0,
+    "right": 6400,
+    "top": 1200,
+    "bottom": 0
+  },
+  "ambient": {
+    "palette": "flood",
+    "musicState": "tense"
+  },
+  "solids": [
+    {
+      "id": "g01",
+      "type": "ground",
+      "x": 400,
+      "y": 75.0,
+      "w": 800,
+      "h": 150
+    },
+    {
+      "id": "g02",
+      "type": "ground",
+      "x": 1300,
+      "y": 75.0,
+      "w": 500,
+      "h": 150
+    },
+    {
+      "id": "g03_pool",
+      "type": "ground",
+      "x": 3300,
+      "y": 30,
+      "w": 2000,
+      "h": 300
+    },
+    {
+      "id": "g04",
+      "type": "ground",
+      "x": 4700,
+      "y": 75.0,
+      "w": 700,
+      "h": 150
+    },
+    {
+      "id": "p01",
+      "type": "platform",
+      "x": 1100,
+      "y": 300,
+      "w": 140,
+      "h": 22
+    },
+    {
+      "id": "g05",
+      "type": "ground",
+      "x": 5400,
+      "y": 75.0,
+      "w": 600,
+      "h": 150
+    },
+    {
+      "id": "g06",
+      "type": "ground",
+      "x": 6100,
+      "y": 75.0,
+      "w": 500,
+      "h": 150
+    },
+    {
+      "id": "w07",
+      "type": "wall",
+      "x": 6350,
+      "y": 400,
+      "w": 40,
+      "h": 700
+    }
+  ],
+  "entities": [
+    {
+      "id": "valve_l07_low",
+      "type": "valve",
+      "x": 1150,
+      "y": 200,
+      "waterID": "w7",
+      "level": "low",
+      "frequency": "edge"
+    },
+    {
+      "id": "valve_l07_mid",
+      "type": "valve",
+      "x": 1300,
+      "y": 200,
+      "waterID": "w7",
+      "level": "mid",
+      "frequency": "body"
+    },
+    {
+      "id": "valve_l07_high",
+      "type": "valve",
+      "x": 1450,
+      "y": 200,
+      "waterID": "w7",
+      "level": "high",
+      "frequency": "deep"
+    },
+    {
+      "id": "float_l07",
+      "type": "platform",
+      "x": 2800,
+      "y": 120,
+      "mode": "floating",
+      "w": 170,
+      "h": 20
+    },
+    {
+      "id": "door_l07",
+      "type": "door",
+      "x": 4800,
+      "y": 300,
+      "frequency": "body",
+      "height": 160
+    },
+    {
+      "id": "wave_l07",
+      "type": "pressurewave",
+      "x": 3300,
+      "y": 300,
+      "w": 1400,
+      "h": 400,
+      "interval": 7.0,
+      "warning": 1.5
+    },
+    {
+      "id": "exit_l07",
+      "type": "exit",
+      "x": 6250,
+      "y": 225
+    }
+  ],
+  "water": [
+    {
+      "id": "w7",
+      "x": 3300,
+      "baseY": 30,
+      "width": 1900,
+      "start": "low",
+      "low": 70,
+      "mid": 190,
+      "high": 300
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "cp_l07_a",
+      "x": 1400,
+      "y": 110
+    },
+    {
+      "id": "cp_l07_b",
+      "x": 4900,
+      "y": 110
+    }
+  ],
+  "storyBeats": [
+    {
+      "id": "b_l07_flood",
+      "triggerType": "enter",
+      "duration": 2.0,
+      "playerLocked": false,
+      "x": 2100
+    }
+  ]
+}

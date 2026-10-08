@@ -1,0 +1,201 @@
+{
+  "id": "L08_SiltTunnels",
+  "name": "Balçık Tünelleri",
+  "chapter": 5,
+  "frequencies": [
+    "deep",
+    "body",
+    "edge"
+  ],
+  "spawn": {
+    "x": 140,
+    "y": 260
+  },
+  "camera": {
+    "left": 0,
+    "right": 6000,
+    "top": 900,
+    "bottom": 0
+  },
+  "ambient": {
+    "palette": "silt",
+    "musicState": "sparse"
+  },
+  "solids": [
+    {
+      "id": "g01",
+      "type": "ground",
+      "x": 400,
+      "y": 75.0,
+      "w": 800,
+      "h": 150
+    },
+    {
+      "id": "g02",
+      "type": "ground",
+      "x": 1500,
+      "y": 75.0,
+      "w": 1000,
+      "h": 150
+    },
+    {
+      "id": "lc1",
+      "type": "lowceiling",
+      "x": 1500,
+      "y": 205,
+      "w": 1000,
+      "h": 40
+    },
+    {
+      "id": "g03",
+      "type": "ground",
+      "x": 2300,
+      "y": 75.0,
+      "w": 600,
+      "h": 150
+    },
+    {
+      "id": "g04",
+      "type": "ground",
+      "x": 3500,
+      "y": 75.0,
+      "w": 1800,
+      "h": 150
+    },
+    {
+      "id": "lc2",
+      "type": "lowceiling",
+      "x": 3100,
+      "y": 210,
+      "w": 300,
+      "h": 40
+    },
+    {
+      "id": "lc3",
+      "type": "lowceiling",
+      "x": 3700,
+      "y": 210,
+      "w": 300,
+      "h": 40
+    },
+    {
+      "id": "lc4",
+      "type": "lowceiling",
+      "x": 4300,
+      "y": 210,
+      "w": 300,
+      "h": 40
+    },
+    {
+      "id": "g05",
+      "type": "ground",
+      "x": 4800,
+      "y": 75.0,
+      "w": 900,
+      "h": 150
+    },
+    {
+      "id": "g06",
+      "type": "ground",
+      "x": 5600,
+      "y": 75.0,
+      "w": 500,
+      "h": 150
+    },
+    {
+      "id": "w08",
+      "type": "wall",
+      "x": 5850,
+      "y": 400,
+      "w": 40,
+      "h": 700
+    }
+  ],
+  "entities": [
+    {
+      "id": "silt_l08_a",
+      "type": "silt",
+      "x": 2500,
+      "y": 200,
+      "w": 300,
+      "h": 130,
+      "interval": 5.0
+    },
+    {
+      "id": "silt_l08_b",
+      "type": "silt",
+      "x": 4900,
+      "y": 200,
+      "w": 400,
+      "h": 130,
+      "interval": 6.5
+    },
+    {
+      "id": "drone_l08_patrol",
+      "type": "drone",
+      "x": 3000,
+      "y": 500,
+      "pathX": [
+        0,
+        900
+      ],
+      "pathY": [
+        0,
+        60
+      ]
+    },
+    {
+      "id": "leak_l08",
+      "type": "electric",
+      "x": 2250,
+      "y": 200,
+      "w": 60,
+      "h": 60,
+      "interval": 3.6
+    },
+    {
+      "id": "door_l08",
+      "type": "door",
+      "x": 5300,
+      "y": 235,
+      "frequency": "edge"
+    },
+    {
+      "id": "exit_l08",
+      "type": "exit",
+      "x": 5750,
+      "y": 225
+    }
+  ],
+  "water": [],
+  "checkpoints": [
+    {
+      "id": "cp_l08_a",
+      "x": 2350,
+      "y": 110
+    },
+    {
+      "id": "cp_l08_b",
+      "x": 4600,
+      "y": 110
+    }
+  ],
+  "storyBeats": [
+    {
+      "id": "b_l08_alone",
+      "triggerType": "enter",
+      "duration": 2.0,
+      "playerLocked": false,
+      "x": 900
+    },
+    {
+      "id": "b_l08_drone",
+      "triggerType": "distance",
+      "duration": 1.6,
+      "playerLocked": false,
+      "x": 3000,
+      "y": 500,
+      "cameraMode": "wide"
+    }
+  ]
+}

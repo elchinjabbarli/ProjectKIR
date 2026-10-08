@@ -1,0 +1,242 @@
+{
+  "id": "L09_MirrorBasin",
+  "name": "Ayna Havzası",
+  "chapter": 5,
+  "frequencies": [
+    "deep",
+    "body",
+    "edge"
+  ],
+  "spawn": {
+    "x": 140,
+    "y": 260
+  },
+  "camera": {
+    "left": 0,
+    "right": 6600,
+    "top": 1300,
+    "bottom": 0
+  },
+  "ambient": {
+    "palette": "flood",
+    "musicState": "sparse"
+  },
+  "solids": [
+    {
+      "id": "g01",
+      "type": "ground",
+      "x": 400,
+      "y": 75.0,
+      "w": 700,
+      "h": 150
+    },
+    {
+      "id": "g02",
+      "type": "ground",
+      "x": 1200,
+      "y": 75.0,
+      "w": 500,
+      "h": 150
+    },
+    {
+      "id": "g03_pool",
+      "type": "ground",
+      "x": 3400,
+      "y": 30,
+      "w": 2400,
+      "h": 300
+    },
+    {
+      "id": "g04",
+      "type": "ground",
+      "x": 5000,
+      "y": 75.0,
+      "w": 800,
+      "h": 150
+    },
+    {
+      "id": "p01",
+      "type": "platform",
+      "x": 1000,
+      "y": 300,
+      "w": 140,
+      "h": 22
+    },
+    {
+      "id": "p02",
+      "type": "platform",
+      "x": 2350,
+      "y": 250,
+      "w": 150,
+      "h": 22
+    },
+    {
+      "id": "p03",
+      "type": "platform",
+      "x": 4750,
+      "y": 350,
+      "w": 160,
+      "h": 22
+    },
+    {
+      "id": "g05",
+      "type": "ground",
+      "x": 5900,
+      "y": 75.0,
+      "w": 600,
+      "h": 150
+    },
+    {
+      "id": "w09",
+      "type": "wall",
+      "x": 6350,
+      "y": 400,
+      "w": 40,
+      "h": 700
+    }
+  ],
+  "entities": [
+    {
+      "id": "valve_l09",
+      "type": "valve",
+      "x": 1400,
+      "y": 200,
+      "waterID": "w9",
+      "level": "low"
+    },
+    {
+      "id": "recv_l09_mirror",
+      "type": "receiver",
+      "x": 2400,
+      "y": 210,
+      "frequency": "deep",
+      "linked": [
+        "mirror_l09_low"
+      ]
+    },
+    {
+      "id": "mirror_l09_low",
+      "type": "mirror",
+      "x": 2600,
+      "y": 210,
+      "orientation": "left"
+    },
+    {
+      "id": "recv_l09_fiber",
+      "type": "receiver",
+      "x": 2900,
+      "y": 210,
+      "frequency": "body",
+      "linked": [
+        "plat_l09_fiber"
+      ]
+    },
+    {
+      "id": "plat_l09_fiber",
+      "type": "platform",
+      "x": 3100,
+      "y": 180,
+      "mode": "triggered",
+      "pathX": [
+        0
+      ],
+      "pathY": [
+        180
+      ],
+      "w": 150,
+      "h": 20
+    },
+    {
+      "id": "bridge_l09",
+      "type": "bridge",
+      "x": 4200,
+      "y": 240,
+      "length": 300,
+      "duration": 5.0
+    },
+    {
+      "id": "mirror_l09_high",
+      "type": "mirror",
+      "x": 4450,
+      "y": 300,
+      "orientation": "up"
+    },
+    {
+      "id": "recv_l09_spine",
+      "type": "receiver",
+      "x": 4750,
+      "y": 420,
+      "frequency": "deep",
+      "linked": [
+        "door_l09"
+      ]
+    },
+    {
+      "id": "door_l09",
+      "type": "door",
+      "x": 5400,
+      "y": 235,
+      "frequency": "deep",
+      "height": 190
+    },
+    {
+      "id": "float_l09",
+      "type": "platform",
+      "x": 3400,
+      "y": 120,
+      "mode": "floating",
+      "w": 150,
+      "h": 20
+    },
+    {
+      "id": "exit_l09",
+      "type": "exit",
+      "x": 6220,
+      "y": 225
+    }
+  ],
+  "water": [
+    {
+      "id": "w9",
+      "x": 3400,
+      "baseY": 30,
+      "width": 2200,
+      "start": "mid",
+      "low": 70,
+      "mid": 200,
+      "high": 320
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "cp_l09_a",
+      "x": 1300,
+      "y": 110
+    },
+    {
+      "id": "cp_l09_b",
+      "x": 5050,
+      "y": 110
+    }
+  ],
+  "storyBeats": [
+    {
+      "id": "b_l09_spine",
+      "triggerType": "receiver",
+      "duration": 3.0,
+      "playerLocked": true,
+      "triggerID": "recv_l09_spine",
+      "cameraMode": "wide",
+      "audioCue": "tone"
+    },
+    {
+      "id": "b_l09_awaken",
+      "triggerType": "distance",
+      "duration": 2.5,
+      "playerLocked": false,
+      "x": 4750,
+      "y": 420,
+      "cameraMode": "wide"
+    }
+  ]
+}

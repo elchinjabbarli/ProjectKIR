@@ -1,0 +1,128 @@
+{
+  "id": "L01_Arrival",
+  "name": "Varış",
+  "chapter": 1,
+  "frequencies": [
+    "deep"
+  ],
+  "spawn": {
+    "x": 140,
+    "y": 260
+  },
+  "camera": {
+    "left": 0,
+    "right": 3800,
+    "top": 1000,
+    "bottom": 0
+  },
+  "ambient": {
+    "palette": "arrival",
+    "musicState": "calm"
+  },
+  "solids": [
+    {
+      "id": "g01",
+      "type": "ground",
+      "x": 400,
+      "y": 75.0,
+      "w": 900,
+      "h": 150
+    },
+    {
+      "id": "g02",
+      "type": "ground",
+      "x": 1220,
+      "y": 75.0,
+      "w": 600,
+      "h": 150
+    },
+    {
+      "id": "g03",
+      "type": "ground",
+      "x": 2050,
+      "y": 75.0,
+      "w": 700,
+      "h": 150
+    },
+    {
+      "id": "g04",
+      "type": "ground",
+      "x": 2850,
+      "y": 75.0,
+      "w": 700,
+      "h": 150
+    },
+    {
+      "id": "g05",
+      "type": "ground",
+      "x": 3560,
+      "y": 75.0,
+      "w": 500,
+      "h": 150
+    },
+    {
+      "id": "p01",
+      "type": "platform",
+      "x": 1560,
+      "y": 240,
+      "w": 120,
+      "h": 22
+    },
+    {
+      "id": "w01",
+      "type": "wall",
+      "x": 3810,
+      "y": 400,
+      "w": 40,
+      "h": 700
+    }
+  ],
+  "entities": [
+    {
+      "id": "door_l01",
+      "type": "door",
+      "x": 2560,
+      "y": 235,
+      "frequency": "deep"
+    },
+    {
+      "id": "exit_l01",
+      "type": "exit",
+      "x": 3660,
+      "y": 225
+    }
+  ],
+  "water": [],
+  "checkpoints": [
+    {
+      "id": "cp_l01_a",
+      "x": 900,
+      "y": 110
+    },
+    {
+      "id": "cp_l01_b",
+      "x": 2900,
+      "y": 110
+    }
+  ],
+  "storyBeats": [
+    {
+      "id": "b_l01_open",
+      "triggerType": "enter",
+      "duration": 2.0,
+      "playerLocked": false,
+      "x": 300
+    },
+    {
+      "id": "b_l01_signal",
+      "triggerType": "distance",
+      "duration": 2.5,
+      "playerLocked": false,
+      "x": 3500,
+      "y": 280,
+      "cameraMode": "focus",
+      "audioCue": "tone"
+    }
+  ],
+  "intro": "arrival"
+}

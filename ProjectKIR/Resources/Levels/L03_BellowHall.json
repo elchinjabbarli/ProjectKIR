@@ -1,0 +1,214 @@
+{
+  "id": "L03_BellowHall",
+  "name": "Körük Salonu",
+  "chapter": 2,
+  "frequencies": [
+    "deep"
+  ],
+  "spawn": {
+    "x": 140,
+    "y": 260
+  },
+  "camera": {
+    "left": 0,
+    "right": 5200,
+    "top": 1100,
+    "bottom": 0
+  },
+  "ambient": {
+    "palette": "gallery",
+    "musicState": "sparse"
+  },
+  "solids": [
+    {
+      "id": "g01",
+      "type": "ground",
+      "x": 400,
+      "y": 75.0,
+      "w": 800,
+      "h": 150
+    },
+    {
+      "id": "g02",
+      "type": "ground",
+      "x": 1200,
+      "y": 75.0,
+      "w": 400,
+      "h": 150
+    },
+    {
+      "id": "fp01",
+      "type": "platform",
+      "x": 1600,
+      "y": 180,
+      "w": 160,
+      "h": 22
+    },
+    {
+      "id": "fp02",
+      "type": "platform",
+      "x": 1900,
+      "y": 240,
+      "w": 160,
+      "h": 22
+    },
+    {
+      "id": "fp03",
+      "type": "platform",
+      "x": 2250,
+      "y": 200,
+      "w": 160,
+      "h": 22
+    },
+    {
+      "id": "g03",
+      "type": "ground",
+      "x": 2900,
+      "y": 75.0,
+      "w": 600,
+      "h": 150
+    },
+    {
+      "id": "mp01",
+      "type": "platform",
+      "x": 3400,
+      "y": 300,
+      "w": 150,
+      "h": 22
+    },
+    {
+      "id": "g04",
+      "type": "ground",
+      "x": 3900,
+      "y": 75.0,
+      "w": 700,
+      "h": 150
+    },
+    {
+      "id": "g05",
+      "type": "ground",
+      "x": 4700,
+      "y": 75.0,
+      "w": 500,
+      "h": 150
+    },
+    {
+      "id": "w03",
+      "type": "wall",
+      "x": 4950,
+      "y": 400,
+      "w": 40,
+      "h": 700
+    }
+  ],
+  "entities": [
+    {
+      "id": "piston_a",
+      "type": "platform",
+      "x": 3400,
+      "y": 220,
+      "mode": "looping",
+      "pathX": [
+        0,
+        130,
+        0,
+        -130
+      ],
+      "pathY": [
+        0,
+        120,
+        0,
+        -40
+      ],
+      "w": 130,
+      "h": 40
+    },
+    {
+      "id": "piston_b",
+      "type": "platform",
+      "x": 3700,
+      "y": 300,
+      "mode": "looping",
+      "pathX": [
+        0,
+        -110,
+        0,
+        110
+      ],
+      "pathY": [
+        0,
+        0,
+        90,
+        0
+      ],
+      "w": 130,
+      "h": 40
+    },
+    {
+      "id": "piston_c",
+      "type": "platform",
+      "x": 4050,
+      "y": 220,
+      "mode": "looping",
+      "pathX": [
+        0,
+        0,
+        90,
+        0
+      ],
+      "pathY": [
+        0,
+        140,
+        0,
+        -60
+      ],
+      "w": 120,
+      "h": 40
+    },
+    {
+      "id": "leak_l03",
+      "type": "electric",
+      "x": 2950,
+      "y": 250,
+      "w": 70,
+      "h": 60,
+      "interval": 5.0
+    },
+    {
+      "id": "door_l03",
+      "type": "door",
+      "x": 4450,
+      "y": 235,
+      "frequency": "deep"
+    },
+    {
+      "id": "exit_l03",
+      "type": "exit",
+      "x": 4830,
+      "y": 225
+    }
+  ],
+  "water": [],
+  "checkpoints": [
+    {
+      "id": "cp_l03_a",
+      "x": 1300,
+      "y": 110
+    },
+    {
+      "id": "cp_l03_b",
+      "x": 3000,
+      "y": 110
+    }
+  ],
+  "storyBeats": [
+    {
+      "id": "b_l03_silence",
+      "triggerType": "enter",
+      "duration": 2.0,
+      "playerLocked": false,
+      "x": 1450,
+      "audioCue": "silence"
+    }
+  ]
+}
