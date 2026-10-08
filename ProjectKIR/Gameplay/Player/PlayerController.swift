@@ -18,7 +18,8 @@ final class PlayerController {
     }
 
     func update(dt: Double, input: inout InputState, locked: Bool) {
-        let player = scene.playerNode
+        // scene.playerNode Optional<PlayerNode> — early return ile güvenli unwrap.
+        guard let player = scene.playerNode else { return }
 
         if locked { input.lock() }
 
