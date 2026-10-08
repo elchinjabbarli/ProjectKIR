@@ -6,7 +6,8 @@ final class CheckpointBeacon: SKNode {
 
     let checkpointID: String
     let levelID: String
-    private(set) var activated = false
+    /// internal(set) — LevelManager restore ve CheckpointManager spawnPoint içinden set edilebilmeli.
+    internal(set) var activated = false
 
     private let post: SKShapeNode
     private let lamp: SKShapeNode
