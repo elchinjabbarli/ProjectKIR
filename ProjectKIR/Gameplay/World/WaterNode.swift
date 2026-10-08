@@ -56,7 +56,7 @@ final class WaterNode: InteractiveObject {
     var surfaceY: CGFloat { return baseY + (levelHeights[currentLevel] ?? 0) }
 
     /// Su yüzeyi altında mı?
-    func contains(_ point: CGPoint) -> Bool {
+    override func contains(_ point: CGPoint) -> Bool {
         return point.x > position.x - width / 2 && point.x < position.x + width / 2
             && point.y < surfaceY && point.y > baseY - 20
     }
