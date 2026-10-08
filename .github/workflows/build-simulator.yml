@@ -52,11 +52,6 @@ jobs:
           xcodebuild -version
 
 
-      - name: List schemes in project (verify shared scheme exists)
-        run: |
-          echo "=== xcodebuild -list ==="
-          xcodebuild -project ProjectKIR.xcodeproj -list
-
       - name: Show resolved build settings (DEBUG, simulator)
         run: |
           echo "=== xcodebuild -showBuildSettings ==="
