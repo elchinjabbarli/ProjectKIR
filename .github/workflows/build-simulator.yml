@@ -68,17 +68,20 @@ jobs:
           echo "=== CRLF var mı? ==="
           grep -c $'\r' ProjectKIR.xcodeproj/project.pbxproj || echo "0 (no CR)"
           echo ""
+          echo "=== plutil -lint pbxproj ==="
+          plutil -lint ProjectKIR.xcodeproj/project.pbxproj
+          echo ""
+          echo "=== plutil -lint contents.xcworkspacedata ==="
+          plutil -lint ProjectKIR.xcodeproj/project.xcworkspace/contents.xcworkspacedata 2>&1 || echo "(lint başarısız)"
+          echo ""
+          echo "=== plutil -lint WorkspaceSettings.xcsettings ==="
+          plutil -lint ProjectKIR.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings 2>&1 || echo "(lint başarısız)"
+          echo ""
+          echo "=== plutil -lint ProjectKIR.xcscheme ==="
+          plutil -lint ProjectKIR.xcodeproj/xcshareddata/xcschemes/ProjectKIR.xcscheme 2>&1 || echo "(lint başarısız)"
+          echo ""
           echo "=== .xcodeproj dizin içeriği ==="
           find ProjectKIR.xcodeproj -type f
-          echo ""
-          echo "=== project.xcworkspace içeriği ==="
-          find ProjectKIR.xcodeproj/project.xcworkspace -type f 2>&1 || echo "  (project.xcworkspace yok)"
-          echo ""
-          echo "=== contents.xcworkspacedata içeriği ==="
-          cat ProjectKIR.xcodeproj/project.xcworkspace/contents.xcworkspacedata 2>&1 || echo "  (dosya yok)"
-          echo ""
-          echo "=== WorkspaceSettings.xcsettings içeriği ==="
-          cat ProjectKIR.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings 2>&1 || echo "  (dosya yok)"
 
       - name: List schemes in project (verify shared scheme exists)
         run: |
