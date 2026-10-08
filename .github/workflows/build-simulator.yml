@@ -51,6 +51,35 @@ jobs:
           echo "Active Xcode:"
           xcodebuild -version
 
+      - name: Diagnostic — inspect pbxproj after checkout
+        run: |
+          echo "=== pbxproj ilk 10 satır ==="
+          head -10 ProjectKIR.xcodeproj/project.pbxproj
+          echo ""
+          echo "=== pbxproj file tipi ==="
+          file ProjectKIR.xcodeproj/project.pbxproj
+          echo ""
+          echo "=== pbxproj byte uzunluğu ==="
+          wc -c ProjectKIR.xcodeproj/project.pbxproj
+          echo ""
+          echo "=== pbxproj md5 ==="
+          md5 -q ProjectKIR.xcodeproj/project.pbxproj 2>/dev/null || md5sum ProjectKIR.xcodeproj/project.pbxproj
+          echo ""
+          echo "=== CRLF var mı? ==="
+          grep -c $'\r' ProjectKIR.xcodeproj/project.pbxproj || echo "0 (no CR)"
+          echo ""
+          echo "=== .xcodeproj dizin içeriği ==="
+          find ProjectKIR.xcodeproj -type f
+          echo ""
+          echo "=== project.xcworkspace içeriği ==="
+          find ProjectKIR.xcodeproj/project.xcworkspace -type f 2>&1 || echo "  (project.xcworkspace yok)"
+          echo ""
+          echo "=== contents.xcworkspacedata içeriği ==="
+          cat ProjectKIR.xcodeproj/project.xcworkspace/contents.xcworkspacedata 2>&1 || echo "  (dosya yok)"
+          echo ""
+          echo "=== WorkspaceSettings.xcsettings içeriği ==="
+          cat ProjectKIR.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings 2>&1 || echo "  (dosya yok)"
+
       - name: List schemes in project (verify shared scheme exists)
         run: |
           echo "=== xcodebuild -list ==="
