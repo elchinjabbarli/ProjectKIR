@@ -163,7 +163,7 @@ final class ResonanceSystem {
         pulses.append(deflected)
         sc.spawnPulseVisual(deflected)
         ResonanceVisuals.chainBeam(from: mirror.position,
-                                   to: mirror.position + CGPoint(x: dir.dx, dy: dir.dy) * 220,
+                                   to: mirror.position + CGPoint(x: dir.dx, y: dir.dy) * 220,
                                    color: KIRPalette.color(for: pulse.frequency),
                                    parent: sc.worldNode)
     }
