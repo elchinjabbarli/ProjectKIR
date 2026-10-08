@@ -16,7 +16,6 @@ final class ReceiverNode: InteractiveObject {
 
     init(entityID: String, frequency: ResonanceFrequency, linkedIDs: [String] = []) {
         self.frequency = frequency
-        self.linkedIDs = linkedIDs
         core = SKShapeNode(circleOfRadius: 14)
         core.fillColor = KIRPalette.ash
         core.strokeColor = KIRPalette.color(for: frequency)
@@ -26,6 +25,8 @@ final class ReceiverNode: InteractiveObject {
         ring.strokeColor = KIRPalette.color(for: frequency).withAlphaComponent(0.35)
         ring.lineWidth = 1.5
         super.init(entityID: entityID)
+        // linkedIDs base class property'si — super.init'den SONRA set edilmeli
+        self.linkedIDs = linkedIDs
         addChild(ring)
         addChild(core)
         attachFrequencyMark(color: KIRPalette.color(for: frequency), pattern: frequency.patternLabel, above: 44)
