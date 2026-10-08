@@ -45,13 +45,6 @@ jobs:
           echo "---"
           xcodebuild -version
 
-      - name: Select Xcode 16.2 (newer pbxproj compatibility)
-        run: |
-          sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
-          echo "Active Xcode:"
-          xcodebuild -version
-
-
       - name: Show resolved build settings (DEBUG, simulator)
         run: |
           echo "=== xcodebuild -showBuildSettings ==="
