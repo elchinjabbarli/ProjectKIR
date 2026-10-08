@@ -24,7 +24,7 @@ enum ProceduralSFX {
         var out = [Float](repeating: 0, count: input.count)
         var y: Float = 0
         for i in 0..<input.count {
-            y += alpha * (input[i] - y)
+            y += Float(alpha) * (input[i] - y)
             out[i] = y
         }
         return out
@@ -40,7 +40,7 @@ enum ProceduralSFX {
         var y: Float = 0
         for i in 0..<input.count {
             let x = input[i]
-            y = alpha * (y + x - prevIn)
+            y = Float(alpha) * (y + x - prevIn)
             prevIn = x
             out[i] = y
         }
@@ -119,9 +119,9 @@ enum ProceduralSFX {
             }
             phase += 2 * .pi * f / sampleRate
             let env = Float(exp(-t * 4.2)) * gain
-            var s = sin(phase)
+            var s = Float(sin(phase))
             if waveform == "triangle" {
-                let p = fmod(phase, 2 * .pi) / (2 * .pi)
+                let p = Float(fmod(phase, 2 * .pi) / (2 * .pi))
                 s = 4 * abs(p - 0.5) - 1
             }
             // Spec 90: hafif noise bileşeni.
