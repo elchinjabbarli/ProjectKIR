@@ -168,7 +168,7 @@ final class PatrolDrone: SKNode {
 
         switch state {
         case .patrol:
-            alertLevel = Math2D.lerp(CGFloat(alertLevel), 0, CGFloat(dt) * 2)
+            alertLevel = Float(Math2D.lerp(CGFloat(alertLevel), 0, CGFloat(dt) * 2))
             moveAlongPath(speed: 85)
             if canSee(player: player) && !playerHidden {
                 enterSuspicion(at: player.position)
@@ -185,7 +185,7 @@ final class PatrolDrone: SKNode {
             if suspicionTimer <= 0 { enterReturn() }
 
         case .alert:
-            alertLevel = Math2D.lerp(CGFloat(alertLevel), 1, CGFloat(dt) * 3)
+            alertLevel = Float(Math2D.lerp(CGFloat(alertLevel), 1, CGFloat(dt) * 3))
             alertTimer -= dt
             if canSee(player: player) && !playerHidden {
                 lastKnownPlayerPos = player.position
