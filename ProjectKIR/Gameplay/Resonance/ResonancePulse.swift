@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 
 /// Spec 17 / 382 — yayılan rezonans pulsu: değer nesnesi.
 /// Emitter'dan çıkar, sabit hızla ilerler, yarıçapı büyür, menzil dolunca söner.
