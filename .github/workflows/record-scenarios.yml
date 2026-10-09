@@ -40,17 +40,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install tools (cliclick for keyboard, idb for touch)
+      - name: Install tools (cliclick for keyboard + mouse)
         run: |
-          echo "=== Install cliclick (keyboard event tool) ==="
+          echo "=== Install cliclick (keyboard + mouse event tool) ==="
           brew install cliclick
           which cliclick && cliclick -V
-
-          echo ""
-          echo "=== Install idb (iOS Simulator touch tool) ==="
-          brew tap facebook/fb 2>/dev/null || true
-          brew install idb 2>&1 || echo "idb install failed — will use AppleScript fallback for taps"
-          which idb 2>/dev/null && idb --version 2>&1 || echo "idb not available"
 
       - name: Find device UDID
         id: sim
@@ -114,13 +108,12 @@ jobs:
           echo "Bundle ID: $BUNDLE_ID"
           echo "bundle_id=$BUNDLE_ID" >> $GITHUB_ENV
 
-      - name: Helper — launch app + start recording
+      - name: Helper — launch app + start recording + tap helper
         id: helpers
         run: |
           # Helper functions for scenario scripts
           cat > /tmp/scenario_helpers.sh << 'HELPER_EOF'
           #!/bin/bash
-          set -e
 
           UDID="${1}"
           BUNDLE_ID="${2}"
@@ -142,7 +135,7 @@ jobs:
           REC_PID=$!
           echo "$REC_PID" > /tmp/rec_pid
 
-          # Activate Simulator for keyboard events
+          # Activate Simulator for keyboard + click events
           osascript -e 'tell application "Simulator" to activate' 2>/dev/null || true
           sleep 1
 
@@ -150,10 +143,57 @@ jobs:
           HELPER_EOF
           chmod +x /tmp/scenario_helpers.sh
 
+          # Tap helper — finds Simulator window and clicks at relative position
+          cat > /tmp/tap_simulator.sh << 'TAP_EOF'
+          #!/bin/bash
+          # Usage: tap_simulator.sh <relative_x> <relative_y>
+          # relative_x/y: 0.0-1.0 (fraction of window width/height)
+          # e.g. tap_simulator.sh 0.5 0.4 = center, slightly above middle
+
+          REL_X="${1:-0.5}"
+          REL_Y="${2:-0.5}"
+
+          # Get Simulator window position and size
+          POS=$(osascript -e 'tell application "System Events" to tell process "Simulator" to get position of window 1' 2>/dev/null)
+          SIZE=$(osascript -e 'tell application "System Events" to tell process "Simulator" to get size of window 1' 2>/dev/null)
+
+          if [ -z "$POS" ] || [ -z "$SIZE" ]; then
+            echo "ERROR: Could not get Simulator window position/size"
+            echo "Trying to activate Simulator..."
+            osascript -e 'tell application "Simulator" to activate' 2>/dev/null || true
+            sleep 2
+            POS=$(osascript -e 'tell application "System Events" to tell process "Simulator" to get position of window 1' 2>/dev/null)
+            SIZE=$(osascript -e 'tell application "System Events" to tell process "Simulator" to get size of window 1' 2>/dev/null)
+          fi
+
+          if [ -z "$POS" ] || [ -z "$SIZE" ]; then
+            echo "ERROR: Simulator window not found — cannot tap"
+            exit 1
+          fi
+
+          # Parse AppleScript output: "x, y" and "w, h"
+          X=$(echo "$POS" | sed 's/,.*//' | tr -d ' ')
+          Y=$(echo "$POS" | sed 's/.*,//' | tr -d ' ')
+          W=$(echo "$SIZE" | sed 's/,.*//' | tr -d ' ')
+          H=$(echo "$SIZE" | sed 's/.*,//' | tr -d ' ')
+
+          # Calculate tap position
+          TAP_X=$(python3 -c "print(int($X + $W * $REL_X))")
+          TAP_Y=$(python3 -c "print(int($Y + $H * $REL_Y))")
+
+          echo "Simulator window: pos=($X,$Y) size=($W,$H)"
+          echo "Tapping at: ($TAP_X, $TAP_Y) [relative ($REL_X, $REL_Y)]"
+
+          # Click via cliclick
+          cliclick c:$TAP_X,$TAP_Y
+          echo "Tap sent."
+          TAP_EOF
+          chmod +x /tmp/tap_simulator.sh
+
           echo "Helpers written."
 
       - name: Record Scenario 1 — Ana Menü + Bölüm Seçimi
-        if: contains(github.event.inputs.scenarios, '1') || github.event.inputs.scenarios == 'all'
+        if: always() && (contains(github.event.inputs.scenarios, '1') || github.event.inputs.scenarios == 'all')
         run: |
           UDID="${{ steps.sim.outputs.udid }}"
           BUNDLE_ID="${{ env.bundle_id }}"
@@ -162,23 +202,18 @@ jobs:
 
           # SCENARIO 1: Show menu animation, then tap "Yeni Oyun"
           #
-          # MainMenuScene buttons (SpriteKit Y-up, landscape 852x393 pts):
-          #   newGame at (cx, cy-20) = (426, 176.5) pts
-          # In screen pixels (top-left origin, 3x scale):
-          #   x = 426 * 3 = 1278
-          #   y = (393 - 176.5) * 3 = 649.5
+          # MainMenuScene buttons (landscape, center + vertical offsets):
+          #   newGame: cy - 20 (slightly above center → relative Y ≈ 0.45)
+          #   cont:    cy - 76
+          #   settings: cy - 132
+          #   credits: cy - 188
           #
           # Show menu for 3s (parallax + amber signal light pulse)
           sleep 3
 
-          # Tap "Yeni Oyun" button
-          if which idb >/dev/null 2>&1; then
-            echo "Tapping 'Yeni Oyun' via idb at (1278, 650)..."
-            idb ui tap --udid "$UDID" 1278 650 2>&1 || echo "idb tap failed"
-          else
-            echo "idb not available — pressing Enter (may not work in menu)"
-            osascript -e 'tell application "System Events" to keystroke return' 2>/dev/null || true
-          fi
+          # Tap "Yeni Oyun" — center horizontally, slightly above center vertically
+          echo "Tapping 'Yeni Oyun' (relative 0.5, 0.45)..."
+          /tmp/tap_simulator.sh 0.5 0.45 || echo "tap failed"
 
           # Wait for chapter card + transition (chapter card auto-advances after 3s)
           sleep 7
@@ -192,7 +227,7 @@ jobs:
           ls -la artifacts/scenario-1.mp4 2>/dev/null || echo "WARNING: video not created"
 
       - name: Record Scenario 2 — İlk Adımlar (L01 Arrival)
-        if: contains(github.event.inputs.scenarios, '2') || github.event.inputs.scenarios == 'all'
+        if: always() && (contains(github.event.inputs.scenarios, '2') || github.event.inputs.scenarios == 'all')
         run: |
           UDID="${{ steps.sim.outputs.udid }}"
           BUNDLE_ID="${{ env.bundle_id }}"
@@ -201,11 +236,7 @@ jobs:
 
           # SCENARIO 2: Start game, walk right, jump, crouch
           # Tap "Yeni Oyun" to start
-          if which idb >/dev/null 2>&1; then
-            idb ui tap --udid "$UDID" 1278 650 2>&1 || true
-          else
-            osascript -e 'tell application "System Events" to keystroke return' 2>/dev/null || true
-          fi
+          /tmp/tap_simulator.sh 0.5 0.45 || true
 
           # Wait for chapter card (3s) + gameplay start
           sleep 6
@@ -238,7 +269,7 @@ jobs:
           ls -la artifacts/scenario-2.mp4 2>/dev/null || echo "WARNING: video not created"
 
       - name: Record Scenario 3 — Rezonans Pulsu (Kapı Açma)
-        if: contains(github.event.inputs.scenarios, '3') || github.event.inputs.scenarios == 'all'
+        if: always() && (contains(github.event.inputs.scenarios, '3') || github.event.inputs.scenarios == 'all')
         run: |
           UDID="${{ steps.sim.outputs.udid }}"
           BUNDLE_ID="${{ env.bundle_id }}"
@@ -247,9 +278,7 @@ jobs:
 
           # SCENARIO 3: Walk to door, charge pulse (J), release → door opens
           # Start game
-          if which idb >/dev/null 2>&1; then
-            idb ui tap --udid "$UDID" 1278 650 2>&1 || true
-          fi
+          /tmp/tap_simulator.sh 0.5 0.45 || true
           sleep 6  # chapter card + gameplay start
 
           # Walk right to approach door (door at x=950, player starts at x=140)
@@ -279,7 +308,7 @@ jobs:
           ls -la artifacts/scenario-3.mp4 2>/dev/null || echo "WARNING: video not created"
 
       - name: Record Scenario 4 — Vana Bulmacası (Su Yükselmesi)
-        if: contains(github.event.inputs.scenarios, '4') || github.event.inputs.scenarios == 'all'
+        if: always() && (contains(github.event.inputs.scenarios, '4') || github.event.inputs.scenarios == 'all')
         run: |
           UDID="${{ steps.sim.outputs.udid }}"
           BUNDLE_ID="${{ env.bundle_id }}"
@@ -288,9 +317,7 @@ jobs:
 
           # SCENARIO 4: Walk to valve, switch to BODY frequency, fire pulse
           # Start game
-          if which idb >/dev/null 2>&1; then
-            idb ui tap --udid "$UDID" 1278 650 2>&1 || true
-          fi
+          /tmp/tap_simulator.sh 0.5 0.45 || true
           sleep 6
 
           # Walk right to find valve
@@ -323,7 +350,7 @@ jobs:
           ls -la artifacts/scenario-4.mp4 2>/dev/null || echo "WARNING: video not created"
 
       - name: Record Scenario 5 — Dron'dan Kaçış
-        if: contains(github.event.inputs.scenarios, '5') || github.event.inputs.scenarios == 'all'
+        if: always() && (contains(github.event.inputs.scenarios, '5') || github.event.inputs.scenarios == 'all')
         run: |
           UDID="${{ steps.sim.outputs.udid }}"
           BUNDLE_ID="${{ env.bundle_id }}"
@@ -332,9 +359,7 @@ jobs:
 
           # SCENARIO 5: Walk into drone patrol area, crouch to hide, evade
           # Start game
-          if which idb >/dev/null 2>&1; then
-            idb ui tap --udid "$UDID" 1278 650 2>&1 || true
-          fi
+          /tmp/tap_simulator.sh 0.5 0.45 || true
           sleep 6
 
           # Walk right into drone area
