@@ -1,0 +1,392 @@
+name: Record Gameplay Scenarios
+
+# Bu workflow ProjectKIR'ı iOS Simulator'da açar, 5 farklı oynanış senaryosunu
+# keyboard/touch event'leri ile oynatır ve her birini ayrı video olarak kaydeder.
+#
+# Araçlar:
+#   - xcrun simctl      : simulator boot/install/launch/recordVideo
+#   - cliclick (brew)   : keyboard key down/up events (gameplay control)
+#   - idb (facebook/fb) : simulator touch events (menu button taps)
+#   - AppleScript       : Simulator.app activate + fallback keystroke
+#
+# Senaryolar:
+#   1. Ana Menü + Bölüm Seçimi (menu → tap "Yeni Oyun" → chapter card)
+#   2. İlk Adımlar — L01 Arrival (walk right, jump, crouch)
+#   3. Rezonans Pulsu — Kapı Açma (charge J, release, door opens)
+#   4. Vana Bulmacası — Su Yükselmesi (switch to BODY freq, fire pulse at valve)
+#   5. Dron'dan Kaçış (walk + crouch to avoid drone sight cone)
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenarios:
+        description: 'Comma-separated scenario numbers (e.g. "1,2,3,4,5" or "all")'
+        default: 'all'
+      device:
+        description: 'Simulator device'
+        type: choice
+        options:
+          - iPhone 15 Pro
+          - iPhone 15
+          - iPad (10th generation)
+        default: iPhone 15 Pro
+
+jobs:
+  record:
+    runs-on: macos-14
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install tools (cliclick for keyboard, idb for touch)
+        run: |
+          echo "=== Install cliclick (keyboard event tool) ==="
+          brew install cliclick
+          which cliclick && cliclick -V
+
+          echo ""
+          echo "=== Install idb (iOS Simulator touch tool) ==="
+          brew tap facebook/fb 2>/dev/null || true
+          brew install idb 2>&1 || echo "idb install failed — will use AppleScript fallback for taps"
+          which idb 2>/dev/null && idb --version 2>&1 || echo "idb not available"
+
+      - name: Find device UDID
+        id: sim
+        run: |
+          DEVICE="${{ github.event.inputs.device || 'iPhone 15 Pro' }}"
+          echo "Device: $DEVICE"
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          target = '$DEVICE'
+          for runtime, devices in data['devices'].items():
+              for d in devices:
+                  if d['name'] == target and d.get('isAvailable', False):
+                      print(d['udid'])
+                      sys.exit(0)
+          for runtime, devices in data['devices'].items():
+              for d in devices:
+                  if 'iPhone' in d['name'] and d.get('isAvailable', False):
+                      print(d['udid']); sys.exit(0)
+          ")
+          [ -z "$UDID" ] && { echo "ERROR: No simulator found"; exit 1; }
+          echo "UDID=$UDID"
+          echo "udid=$UDID" >> $GITHUB_OUTPUT
+          echo "device=$DEVICE" >> $GITHUB_OUTPUT
+
+      - name: Boot simulator
+        run: |
+          UDID="${{ steps.sim.outputs.udid }}"
+          echo "Booting $UDID..."
+          xcrun simctl boot "$UDID" 2>/dev/null || true
+          xcrun simctl bootstatus "$UDID" -b
+          echo "Simulator booted."
+          # Open Simulator.app for AppleScript / cliclick (needs GUI frontmost)
+          open -a Simulator
+          sleep 5
+
+      - name: Build app
+        run: |
+          UDID="${{ steps.sim.outputs.udid }}"
+          echo "=== BUILD START ==="
+          xcodebuild \
+            -project ProjectKIR.xcodeproj \
+            -scheme ProjectKIR \
+            -configuration Debug \
+            -destination "id=$UDID" \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build 2>&1 | tee build.log
+          BUILD_EXIT=${PIPESTATUS[0]}
+          echo "=== BUILD EXIT: $BUILD_EXIT ==="
+          exit $BUILD_EXIT
+
+      - name: Install + get bundle ID
+        run: |
+          UDID="${{ steps.sim.outputs.udid }}"
+          APP=$(find build/DerivedData -name "*.app" -path "*Debug*" -type d | head -1)
+          [ -z "$APP" ] && { echo "ERROR: .app not found"; exit 1; }
+          echo "App: $APP"
+          xcrun simctl install "$UDID" "$APP"
+          BUNDLE_ID=$(plutil -extract CFBundleIdentifier raw "$APP/Info.plist")
+          echo "Bundle ID: $BUNDLE_ID"
+          echo "bundle_id=$BUNDLE_ID" >> $GITHUB_ENV
+
+      - name: Helper — launch app + start recording
+        id: helpers
+        run: |
+          # Helper functions for scenario scripts
+          cat > /tmp/scenario_helpers.sh << 'HELPER_EOF'
+          #!/bin/bash
+          set -e
+
+          UDID="${1}"
+          BUNDLE_ID="${2}"
+          SCENARIO="${3}"
+          VIDEO_FILE="artifacts/scenario-${SCENARIO}.mp4"
+
+          mkdir -p artifacts
+
+          echo "--- Scenario $SCENARIO: terminate old app ---"
+          xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2>/dev/null || true
+          sleep 1
+
+          echo "--- Scenario $SCENARIO: launch app ---"
+          xcrun simctl launch "$UDID" "$BUNDLE_ID"
+          sleep 5  # wait for menu to render (parallax + amber light pulse)
+
+          echo "--- Scenario $SCENARIO: start recording ---"
+          xcrun simctl io "$UDID" recordVideo --codec=h264 "$VIDEO_FILE" &
+          REC_PID=$!
+          echo "$REC_PID" > /tmp/rec_pid
+
+          # Activate Simulator for keyboard events
+          osascript -e 'tell application "Simulator" to activate' 2>/dev/null || true
+          sleep 1
+
+          echo "--- Scenario $SCENARIO: recording started (PID=$REC_PID) ---"
+          HELPER_EOF
+          chmod +x /tmp/scenario_helpers.sh
+
+          echo "Helpers written."
+
+      - name: Record Scenario 1 — Ana Menü + Bölüm Seçimi
+        if: contains(github.event.inputs.scenarios, '1') || github.event.inputs.scenarios == 'all'
+        run: |
+          UDID="${{ steps.sim.outputs.udid }}"
+          BUNDLE_ID="${{ env.bundle_id }}"
+          source /tmp/scenario_helpers.sh
+          launch_and_record "$UDID" "$BUNDLE_ID" "1"
+
+          # SCENARIO 1: Show menu animation, then tap "Yeni Oyun"
+          #
+          # MainMenuScene buttons (SpriteKit Y-up, landscape 852x393 pts):
+          #   newGame at (cx, cy-20) = (426, 176.5) pts
+          # In screen pixels (top-left origin, 3x scale):
+          #   x = 426 * 3 = 1278
+          #   y = (393 - 176.5) * 3 = 649.5
+          #
+          # Show menu for 3s (parallax + amber signal light pulse)
+          sleep 3
+
+          # Tap "Yeni Oyun" button
+          if which idb >/dev/null 2>&1; then
+            echo "Tapping 'Yeni Oyun' via idb at (1278, 650)..."
+            idb ui tap --udid "$UDID" 1278 650 2>&1 || echo "idb tap failed"
+          else
+            echo "idb not available — pressing Enter (may not work in menu)"
+            osascript -e 'tell application "System Events" to keystroke return' 2>/dev/null || true
+          fi
+
+          # Wait for chapter card + transition (chapter card auto-advances after 3s)
+          sleep 7
+
+          # Stop recording
+          kill -INT $(cat /tmp/rec_pid) 2>/dev/null || true
+          wait $(cat /tmp/rec_pid) 2>/dev/null || true
+          sleep 1
+
+          echo "=== Scenario 1 video ==="
+          ls -la artifacts/scenario-1.mp4 2>/dev/null || echo "WARNING: video not created"
+
+      - name: Record Scenario 2 — İlk Adımlar (L01 Arrival)
+        if: contains(github.event.inputs.scenarios, '2') || github.event.inputs.scenarios == 'all'
+        run: |
+          UDID="${{ steps.sim.outputs.udid }}"
+          BUNDLE_ID="${{ env.bundle_id }}"
+          source /tmp/scenario_helpers.sh
+          launch_and_record "$UDID" "$BUNDLE_ID" "2"
+
+          # SCENARIO 2: Start game, walk right, jump, crouch
+          # Tap "Yeni Oyun" to start
+          if which idb >/dev/null 2>&1; then
+            idb ui tap --udid "$UDID" 1278 650 2>&1 || true
+          else
+            osascript -e 'tell application "System Events" to keystroke return' 2>/dev/null || true
+          fi
+
+          # Wait for chapter card (3s) + gameplay start
+          sleep 6
+
+          # Walk right for 2 seconds (hold D key via cliclick)
+          echo "Walking right (hold D for 2s)..."
+          cliclick kd:d
+          sleep 2
+          cliclick ku:d
+
+          # Jump (press W)
+          echo "Jumping (press W)..."
+          osascript -e 'tell application "System Events" to keystroke "w"' 2>/dev/null || true
+          sleep 1
+
+          # Crouch (press S)
+          echo "Crouching (press S)..."
+          osascript -e 'tell application "System Events" to keystroke "s"' 2>/dev/null || true
+          sleep 1
+
+          # Show parallax + environment
+          sleep 3
+
+          # Stop recording
+          kill -INT $(cat /tmp/rec_pid) 2>/dev/null || true
+          wait $(cat /tmp/rec_pid) 2>/dev/null || true
+          sleep 1
+
+          echo "=== Scenario 2 video ==="
+          ls -la artifacts/scenario-2.mp4 2>/dev/null || echo "WARNING: video not created"
+
+      - name: Record Scenario 3 — Rezonans Pulsu (Kapı Açma)
+        if: contains(github.event.inputs.scenarios, '3') || github.event.inputs.scenarios == 'all'
+        run: |
+          UDID="${{ steps.sim.outputs.udid }}"
+          BUNDLE_ID="${{ env.bundle_id }}"
+          source /tmp/scenario_helpers.sh
+          launch_and_record "$UDID" "$BUNDLE_ID" "3"
+
+          # SCENARIO 3: Walk to door, charge pulse (J), release → door opens
+          # Start game
+          if which idb >/dev/null 2>&1; then
+            idb ui tap --udid "$UDID" 1278 650 2>&1 || true
+          fi
+          sleep 6  # chapter card + gameplay start
+
+          # Walk right to approach door (door at x=950, player starts at x=140)
+          echo "Walking to door (hold D for 4s)..."
+          cliclick kd:d
+          sleep 4
+          cliclick ku:d
+          sleep 1
+
+          # Charge resonance pulse (hold J for ~1s)
+          echo "Charging pulse (hold J)..."
+          cliclick kd:j
+          sleep 1.5
+          # Release → fire pulse
+          echo "Releasing pulse (release J)..."
+          cliclick ku:j
+
+          # Watch door open + amber signal light
+          sleep 6
+
+          # Stop recording
+          kill -INT $(cat /tmp/rec_pid) 2>/dev/null || true
+          wait $(cat /tmp/rec_pid) 2>/dev/null || true
+          sleep 1
+
+          echo "=== Scenario 3 video ==="
+          ls -la artifacts/scenario-3.mp4 2>/dev/null || echo "WARNING: video not created"
+
+      - name: Record Scenario 4 — Vana Bulmacası (Su Yükselmesi)
+        if: contains(github.event.inputs.scenarios, '4') || github.event.inputs.scenarios == 'all'
+        run: |
+          UDID="${{ steps.sim.outputs.udid }}"
+          BUNDLE_ID="${{ env.bundle_id }}"
+          source /tmp/scenario_helpers.sh
+          launch_and_record "$UDID" "$BUNDLE_ID" "4"
+
+          # SCENARIO 4: Walk to valve, switch to BODY frequency, fire pulse
+          # Start game
+          if which idb >/dev/null 2>&1; then
+            idb ui tap --udid "$UDID" 1278 650 2>&1 || true
+          fi
+          sleep 6
+
+          # Walk right to find valve
+          echo "Walking to valve (hold D for 5s)..."
+          cliclick kd:d
+          sleep 5
+          cliclick ku:d
+          sleep 1
+
+          # Switch to BODY frequency (press E to cycle DEEP → BODY)
+          echo "Switching to BODY frequency (press E)..."
+          osascript -e 'tell application "System Events" to keystroke "e"' 2>/dev/null || true
+          sleep 1
+
+          # Charge + fire pulse at valve
+          echo "Charging pulse at valve (hold J)..."
+          cliclick kd:j
+          sleep 1.5
+          cliclick ku:j
+
+          # Watch water rise
+          sleep 7
+
+          # Stop recording
+          kill -INT $(cat /tmp/rec_pid) 2>/dev/null || true
+          wait $(cat /tmp/rec_pid) 2>/dev/null || true
+          sleep 1
+
+          echo "=== Scenario 4 video ==="
+          ls -la artifacts/scenario-4.mp4 2>/dev/null || echo "WARNING: video not created"
+
+      - name: Record Scenario 5 — Dron'dan Kaçış
+        if: contains(github.event.inputs.scenarios, '5') || github.event.inputs.scenarios == 'all'
+        run: |
+          UDID="${{ steps.sim.outputs.udid }}"
+          BUNDLE_ID="${{ env.bundle_id }}"
+          source /tmp/scenario_helpers.sh
+          launch_and_record "$UDID" "$BUNDLE_ID" "5"
+
+          # SCENARIO 5: Walk into drone patrol area, crouch to hide, evade
+          # Start game
+          if which idb >/dev/null 2>&1; then
+            idb ui tap --udid "$UDID" 1278 650 2>&1 || true
+          fi
+          sleep 6
+
+          # Walk right into drone area
+          echo "Walking into drone patrol area (hold D for 4s)..."
+          cliclick kd:d
+          sleep 4
+          cliclick ku:d
+          sleep 1
+
+          # Crouch to reduce drone sight range (spec 56: crouchSightFactor = 0.6)
+          echo "Crouching to hide from drone (press S)..."
+          osascript -e 'tell application "System Events" to keystroke "s"' 2>/dev/null || true
+          sleep 2
+
+          # Continue moving while crouched
+          echo "Moving while crouched (hold D + S)..."
+          cliclick kd:d
+          sleep 3
+          cliclick ku:d
+
+          # Show drone patrol + alert state
+          sleep 4
+
+          # Stop recording
+          kill -INT $(cat /tmp/rec_pid) 2>/dev/null || true
+          wait $(cat /tmp/rec_pid) 2>/dev/null || true
+          sleep 1
+
+          echo "=== Scenario 5 video ==="
+          ls -la artifacts/scenario-5.mp4 2>/dev/null || echo "WARNING: video not created"
+
+      - name: Summary — list all videos
+        if: always()
+        run: |
+          echo "=== All scenario videos ==="
+          ls -la artifacts/scenario-*.mp4 2>/dev/null || echo "No videos found"
+          echo ""
+          echo "=== Video file sizes ==="
+          for f in artifacts/scenario-*.mp4; do
+            if [ -f "$f" ]; then
+              SIZE=$(stat -f%z "$f" 2>/dev/null || stat -c%s "$f" 2>/dev/null)
+              echo "  $f: $SIZE bytes"
+            fi
+          done
+
+      - name: Upload all scenario videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gameplay-scenarios
+          path: |
+            artifacts/scenario-*.mp4
+            build.log
+          if-no-files-found: warn
+          retention-days: 30
