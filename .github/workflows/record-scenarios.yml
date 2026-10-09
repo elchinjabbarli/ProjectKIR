@@ -115,31 +115,42 @@ jobs:
           cat > /tmp/scenario_helpers.sh << 'HELPER_EOF'
           #!/bin/bash
 
-          UDID="${1}"
-          BUNDLE_ID="${2}"
-          SCENARIO="${3}"
-          VIDEO_FILE="artifacts/scenario-${SCENARIO}.mp4"
+          # Fonksiyon: launch_and_record <UDID> <BUNDLE_ID> <SCENARIO_NUM>
+          launch_and_record() {
+            local UDID="$1"
+            local BUNDLE_ID="$2"
+            local SCENARIO="$3"
+            local VIDEO_FILE="artifacts/scenario-${SCENARIO}.mp4"
 
-          mkdir -p artifacts
+            mkdir -p artifacts
 
-          echo "--- Scenario $SCENARIO: terminate old app ---"
-          xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2>/dev/null || true
-          sleep 1
+            echo "--- Scenario $SCENARIO: terminate old app ---"
+            xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2>/dev/null || true
+            sleep 1
 
-          echo "--- Scenario $SCENARIO: launch app ---"
-          xcrun simctl launch "$UDID" "$BUNDLE_ID"
-          sleep 5  # wait for menu to render (parallax + amber light pulse)
+            echo "--- Scenario $SCENARIO: launch app ---"
+            xcrun simctl launch "$UDID" "$BUNDLE_ID"
+            sleep 5  # wait for menu to render (parallax + amber light pulse)
 
-          echo "--- Scenario $SCENARIO: start recording ---"
-          xcrun simctl io "$UDID" recordVideo --codec=h264 "$VIDEO_FILE" &
-          REC_PID=$!
-          echo "$REC_PID" > /tmp/rec_pid
+            echo "--- Scenario $SCENARIO: start recording ---"
+            # --duration=20: otomatik 20 saniye sonra durur (kill gerekmez)
+            xcrun simctl io "$UDID" recordVideo --codec=h264 --duration=20 --force "$VIDEO_FILE" &
+            local REC_PID=$!
+            echo "$REC_PID" > /tmp/rec_pid
+            sleep 2  # recordVideo'nun başlamasını bekle
 
-          # Activate Simulator for keyboard + click events
-          osascript -e 'tell application "Simulator" to activate' 2>/dev/null || true
-          sleep 1
-
-          echo "--- Scenario $SCENARIO: recording started (PID=$REC_PID) ---"
+            # recordVideo gerçekten çalışıyor mu?
+            if kill -0 "$REC_PID" 2>/dev/null; then
+              echo "--- Scenario $SCENARIO: recording started (PID=$REC_PID) → $VIDEO_FILE ---"
+            else
+              echo "--- Scenario $SCENARIO: WARN: recordVideo may have failed — trying foreground ---"
+              # Hata mesajını görmek için foreground'da kısa süre dene
+              xcrun simctl io "$UDID" recordVideo --codec=h264 --duration=15 --force "$VIDEO_FILE" 2>&1 | head -5 &
+              REC_PID=$!
+              echo "$REC_PID" > /tmp/rec_pid
+              sleep 2
+            fi
+          }
           HELPER_EOF
           chmod +x /tmp/scenario_helpers.sh
 
@@ -169,7 +180,7 @@ jobs:
 
           if [ -z "$POS" ] || [ -z "$SIZE" ]; then
             echo "WARN: Simulator window not found — tap skipped (video will still record static state)"
-            exit 0  # hata verme — step devam etsin
+            exit 0
           fi
 
           # Parse AppleScript output: "x, y" and "w, h"
@@ -197,7 +208,7 @@ jobs:
             osascript -e "tell application \"System Events\" to click at {$TAP_X, $TAP_Y}" 2>/dev/null
           fi
           echo "Tap attempt completed."
-          exit 0  # always success
+          exit 0
           TAP_EOF
           chmod +x /tmp/tap_simulator.sh
 
