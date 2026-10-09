@@ -133,23 +133,23 @@ jobs:
             sleep 5  # wait for menu to render (parallax + amber light pulse)
 
             echo "--- Scenario $SCENARIO: start recording ---"
-            # --duration=20: otomatik 20 saniye sonra durur (kill gerekmez)
-            xcrun simctl io "$UDID" recordVideo --codec=h264 --duration=20 --force "$VIDEO_FILE" &
+            # xcrun simctl io recordVideo — --duration/--force yok (Xcode 15.4'te bozuk)
+            # Background'da başlat, sleep ile bekle, kill -INT ile durdur
+            xcrun simctl io "$UDID" recordVideo --codec=h264 "$VIDEO_FILE" &
             local REC_PID=$!
             echo "$REC_PID" > /tmp/rec_pid
-            sleep 2  # recordVideo'nun başlamasını bekle
+            sleep 2  # recordVideo'nun başlaması için bekle
 
-            # recordVideo gerçekten çalışıyor mu?
+            # recordVideo çalışıyor mu?
             if kill -0 "$REC_PID" 2>/dev/null; then
               echo "--- Scenario $SCENARIO: recording started (PID=$REC_PID) → $VIDEO_FILE ---"
             else
-              echo "--- Scenario $SCENARIO: WARN: recordVideo may have failed — trying foreground ---"
-              # Hata mesajını görmek için foreground'da kısa süre dene
-              xcrun simctl io "$UDID" recordVideo --codec=h264 --duration=15 --force "$VIDEO_FILE" 2>&1 | head -5 &
-              REC_PID=$!
-              echo "$REC_PID" > /tmp/rec_pid
-              sleep 2
+              echo "--- Scenario $SCENARIO: WARN: recordVideo process died early ---"
             fi
+
+            # Activate Simulator for keyboard + click events
+            osascript -e 'tell application "Simulator" to activate' 2>/dev/null || true
+            sleep 1
           }
           HELPER_EOF
           chmod +x /tmp/scenario_helpers.sh
@@ -242,9 +242,11 @@ jobs:
           sleep 7
 
           # Stop recording
-          echo "Waiting for recordVideo to finalize..."
-          wait $(cat /tmp/rec_pid) 2>/dev/null
+          echo "Stopping recordVideo..."
+          kill -INT $(cat /tmp/rec_pid) 2>/dev/null || true
+          wait $(cat /tmp/rec_pid) 2>/dev/null || true
           echo "recordVideo completed."
+          ls -la "$VIDEO_FILE" 2>/dev/null || echo "WARN: video file not found"
           sleep 1
 
           echo "=== Scenario 1 video ==="
@@ -286,9 +288,11 @@ jobs:
           sleep 3
 
           # Stop recording
-          echo "Waiting for recordVideo to finalize..."
-          wait $(cat /tmp/rec_pid) 2>/dev/null
+          echo "Stopping recordVideo..."
+          kill -INT $(cat /tmp/rec_pid) 2>/dev/null || true
+          wait $(cat /tmp/rec_pid) 2>/dev/null || true
           echo "recordVideo completed."
+          ls -la "$VIDEO_FILE" 2>/dev/null || echo "WARN: video file not found"
           sleep 1
 
           echo "=== Scenario 2 video ==="
@@ -327,9 +331,11 @@ jobs:
           sleep 6
 
           # Stop recording
-          echo "Waiting for recordVideo to finalize..."
-          wait $(cat /tmp/rec_pid) 2>/dev/null
+          echo "Stopping recordVideo..."
+          kill -INT $(cat /tmp/rec_pid) 2>/dev/null || true
+          wait $(cat /tmp/rec_pid) 2>/dev/null || true
           echo "recordVideo completed."
+          ls -la "$VIDEO_FILE" 2>/dev/null || echo "WARN: video file not found"
           sleep 1
 
           echo "=== Scenario 3 video ==="
@@ -371,9 +377,11 @@ jobs:
           sleep 7
 
           # Stop recording
-          echo "Waiting for recordVideo to finalize..."
-          wait $(cat /tmp/rec_pid) 2>/dev/null
+          echo "Stopping recordVideo..."
+          kill -INT $(cat /tmp/rec_pid) 2>/dev/null || true
+          wait $(cat /tmp/rec_pid) 2>/dev/null || true
           echo "recordVideo completed."
+          ls -la "$VIDEO_FILE" 2>/dev/null || echo "WARN: video file not found"
           sleep 1
 
           echo "=== Scenario 4 video ==="
@@ -415,9 +423,11 @@ jobs:
           sleep 4
 
           # Stop recording
-          echo "Waiting for recordVideo to finalize..."
-          wait $(cat /tmp/rec_pid) 2>/dev/null
+          echo "Stopping recordVideo..."
+          kill -INT $(cat /tmp/rec_pid) 2>/dev/null || true
+          wait $(cat /tmp/rec_pid) 2>/dev/null || true
           echo "recordVideo completed."
+          ls -la "$VIDEO_FILE" 2>/dev/null || echo "WARN: video file not found"
           sleep 1
 
           echo "=== Scenario 5 video ==="
