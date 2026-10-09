@@ -242,8 +242,9 @@ jobs:
           sleep 7
 
           # Stop recording
-          kill -INT $(cat /tmp/rec_pid) 2>/dev/null || true
-          wait $(cat /tmp/rec_pid) 2>/dev/null || true
+          echo "Waiting for recordVideo to finalize..."
+          wait $(cat /tmp/rec_pid) 2>/dev/null
+          echo "recordVideo completed."
           sleep 1
 
           echo "=== Scenario 1 video ==="
@@ -285,8 +286,9 @@ jobs:
           sleep 3
 
           # Stop recording
-          kill -INT $(cat /tmp/rec_pid) 2>/dev/null || true
-          wait $(cat /tmp/rec_pid) 2>/dev/null || true
+          echo "Waiting for recordVideo to finalize..."
+          wait $(cat /tmp/rec_pid) 2>/dev/null
+          echo "recordVideo completed."
           sleep 1
 
           echo "=== Scenario 2 video ==="
@@ -325,8 +327,9 @@ jobs:
           sleep 6
 
           # Stop recording
-          kill -INT $(cat /tmp/rec_pid) 2>/dev/null || true
-          wait $(cat /tmp/rec_pid) 2>/dev/null || true
+          echo "Waiting for recordVideo to finalize..."
+          wait $(cat /tmp/rec_pid) 2>/dev/null
+          echo "recordVideo completed."
           sleep 1
 
           echo "=== Scenario 3 video ==="
@@ -368,8 +371,9 @@ jobs:
           sleep 7
 
           # Stop recording
-          kill -INT $(cat /tmp/rec_pid) 2>/dev/null || true
-          wait $(cat /tmp/rec_pid) 2>/dev/null || true
+          echo "Waiting for recordVideo to finalize..."
+          wait $(cat /tmp/rec_pid) 2>/dev/null
+          echo "recordVideo completed."
           sleep 1
 
           echo "=== Scenario 4 video ==="
@@ -411,8 +415,9 @@ jobs:
           sleep 4
 
           # Stop recording
-          kill -INT $(cat /tmp/rec_pid) 2>/dev/null || true
-          wait $(cat /tmp/rec_pid) 2>/dev/null || true
+          echo "Waiting for recordVideo to finalize..."
+          wait $(cat /tmp/rec_pid) 2>/dev/null
+          echo "recordVideo completed."
           sleep 1
 
           echo "=== Scenario 5 video ==="
