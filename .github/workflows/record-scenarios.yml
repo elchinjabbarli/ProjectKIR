@@ -146,6 +146,7 @@ jobs:
           # Tap helper — finds Simulator window and clicks at relative position
           cat > /tmp/tap_simulator.sh << 'TAP_EOF'
           #!/bin/bash
+          set +e  # hataları durdurma — dayanıklı ol
           # Usage: tap_simulator.sh <relative_x> <relative_y>
           # relative_x/y: 0.0-1.0 (fraction of window width/height)
           # e.g. tap_simulator.sh 0.5 0.4 = center, slightly above middle
@@ -158,17 +159,17 @@ jobs:
           SIZE=$(osascript -e 'tell application "System Events" to tell process "Simulator" to get size of window 1' 2>/dev/null)
 
           if [ -z "$POS" ] || [ -z "$SIZE" ]; then
-            echo "ERROR: Could not get Simulator window position/size"
+            echo "WARN: Could not get Simulator window position/size (System Events permission?)"
             echo "Trying to activate Simulator..."
-            osascript -e 'tell application "Simulator" to activate' 2>/dev/null || true
+            osascript -e 'tell application "Simulator" to activate' 2>/dev/null
             sleep 2
             POS=$(osascript -e 'tell application "System Events" to tell process "Simulator" to get position of window 1' 2>/dev/null)
             SIZE=$(osascript -e 'tell application "System Events" to tell process "Simulator" to get size of window 1' 2>/dev/null)
           fi
 
           if [ -z "$POS" ] || [ -z "$SIZE" ]; then
-            echo "ERROR: Simulator window not found — cannot tap"
-            exit 1
+            echo "WARN: Simulator window not found — tap skipped (video will still record static state)"
+            exit 0  # hata verme — step devam etsin
           fi
 
           # Parse AppleScript output: "x, y" and "w, h"
@@ -178,15 +179,25 @@ jobs:
           H=$(echo "$SIZE" | sed 's/.*,//' | tr -d ' ')
 
           # Calculate tap position
-          TAP_X=$(python3 -c "print(int($X + $W * $REL_X))")
-          TAP_Y=$(python3 -c "print(int($Y + $H * $REL_Y))")
+          TAP_X=$(python3 -c "print(int($X + $W * $REL_X))" 2>/dev/null)
+          TAP_Y=$(python3 -c "print(int($Y + $H * $REL_Y))" 2>/dev/null)
+
+          if [ -z "$TAP_X" ] || [ -z "$TAP_Y" ]; then
+            echo "WARN: Could not calculate tap position"
+            exit 0
+          fi
 
           echo "Simulator window: pos=($X,$Y) size=($W,$H)"
           echo "Tapping at: ($TAP_X, $TAP_Y) [relative ($REL_X, $REL_Y)]"
 
-          # Click via cliclick
-          cliclick c:$TAP_X,$TAP_Y
-          echo "Tap sent."
+          # Click via cliclick (may fail if no GUI session)
+          cliclick c:$TAP_X,$TAP_Y 2>/dev/null
+          if [ $? -ne 0 ]; then
+            echo "WARN: cliclick failed — trying osascript click"
+            osascript -e "tell application \"System Events\" to click at {$TAP_X, $TAP_Y}" 2>/dev/null
+          fi
+          echo "Tap attempt completed."
+          exit 0  # always success
           TAP_EOF
           chmod +x /tmp/tap_simulator.sh
 
@@ -197,6 +208,7 @@ jobs:
         run: |
           UDID="${{ steps.sim.outputs.udid }}"
           BUNDLE_ID="${{ env.bundle_id }}"
+          set +e  # dayanıklı mod — hata olsa bile step devam etsin
           source /tmp/scenario_helpers.sh
           launch_and_record "$UDID" "$BUNDLE_ID" "1"
 
@@ -231,6 +243,7 @@ jobs:
         run: |
           UDID="${{ steps.sim.outputs.udid }}"
           BUNDLE_ID="${{ env.bundle_id }}"
+          set +e  # dayanıklı mod — hata olsa bile step devam etsin
           source /tmp/scenario_helpers.sh
           launch_and_record "$UDID" "$BUNDLE_ID" "2"
 
@@ -273,6 +286,7 @@ jobs:
         run: |
           UDID="${{ steps.sim.outputs.udid }}"
           BUNDLE_ID="${{ env.bundle_id }}"
+          set +e  # dayanıklı mod — hata olsa bile step devam etsin
           source /tmp/scenario_helpers.sh
           launch_and_record "$UDID" "$BUNDLE_ID" "3"
 
@@ -312,6 +326,7 @@ jobs:
         run: |
           UDID="${{ steps.sim.outputs.udid }}"
           BUNDLE_ID="${{ env.bundle_id }}"
+          set +e  # dayanıklı mod — hata olsa bile step devam etsin
           source /tmp/scenario_helpers.sh
           launch_and_record "$UDID" "$BUNDLE_ID" "4"
 
@@ -354,6 +369,7 @@ jobs:
         run: |
           UDID="${{ steps.sim.outputs.udid }}"
           BUNDLE_ID="${{ env.bundle_id }}"
+          set +e  # dayanıklı mod — hata olsa bile step devam etsin
           source /tmp/scenario_helpers.sh
           launch_and_record "$UDID" "$BUNDLE_ID" "5"
 
